@@ -1,5 +1,6 @@
 "use client";
 import { signIn } from "next-auth/react";
+import Image from 'next/image'
 export default async function Home() {
   // const { stargazers_count: stars } = await fetch(
   //   "https://api.github.com/repos/steven-tey/precedent",
@@ -20,83 +21,70 @@ export default async function Home() {
   return (
     <>
       <div className="grid min-h-screen w-full grid-cols-5">
-        <div className="loginBack relative col-span-5 lg:col-span-2 p-10">
+        <div className="loginBack  relative col-span-5 lg:col-span-2 p-10 bg-[url('/bg_logo.png')] bg-cover  bg-no-repeat" >
+       
+
+
           <div>
-            <a href="http://availrecovery.keenagile.in" className="py-2">
-              {/* <img
+            <a href="#" className="py-2">
+               <img
                 src={"/logo.png"}
                 alt="Precedent Logo"
-                className="h-10 opacity-95"
-              /> */}
-              <h1 className="text-lg font-bold">Logo</h1>
+                className="h-16 opacity-95"
+              /> 
+              
             </a>
-            <h1 className="pb-5 text-white">
-              IT Asset Disposition (KeenAgile) Customer Portal
+            <h1 className="pb-5 text-white text-2xl">
+              IT Asset Disposition (ITAD USA) Customer Portal
             </h1>
           </div>
           <div className="lg:absolute bottom-16">
-            <p className="mb-4 pr-10 text-white text-sm sm:text-md">
+            <p className="mb-4 pr-10 text-white text-lg sm:text-md hidden">
             A platform for quoting and booking KeenAgile lots/shipments, tracking project statuses in real time, running detailed asset reports, and collaborating across multiple users in your organization.
 
 
             </p>
             <p className=" text-white text-sm sm:text-md">
-              2022 | KeenAgile © Copyright
+              2023 | ITAD USA © Copyright
             </p>
           </div>
         </div>
-        <div className="col-span-5 lg:col-span-3 bg-white  py-8">
-          <div className="flex justify-between">
-            <div className="px-3 text-xs sm:text-base">
-             
-            </div>
-            <div className="flex items-center px-4">
-              {/* <img
-                src={"/icon2.png"}
-                alt="Precedent Logo"
-                className="h-3 md:h-6 opacity-95"
-              />
-              <img
-                src={"/icon1.png"}
-                alt="Precedent Logo"
-                className="h-6 md:h-12 opacity-95"
-              /> */}
-            </div>
-          </div>
+        <div className="col-span-5 lg:col-span-3  py-4 place-self-center mb-percent-10">
+          
           <div className="">
             <div className="mx-auto px-10 lg:px-28 xl:px-44 pt-10">
               <form className="w-100">
-                <div className="mb-5 text-center">
+                <div className="mb-5 text-center self-start">
                   <h1 className="text-dark mb-3 text-3xl font-semibold">
                     Sign In
                   </h1>
                   <h2 className="text-gray-600 text-sm sm:text-md lg:text-lg">
-                    Welcome{" "}
-                    <strong className="text-gray-800">Keenagile</strong>
-                    customers to the experience.
+                    Sign In {" "}
+                    <strong className="text-gray-800">ITAD USA </strong>
+                    Marketing Contact Data.
                   </h2>
                 </div>
               
 
                 
               
-                <div className="text-center">
+                <div className="text-center flex justify-center">
                  
-                  <div className="flex justify-center">
-                    <a
-                       onClick={() => {
+                
+                  <div className="mt-6 gap-4">
+                            <a  onClick={() => {
                         signIn("salesforce", { callbackUrl:"/dashboard"} );
                       }}
-                      className="flex justify-around px-4 py-3 mediaBtn items-center rounded mb-5"
-                    >
-                      <img
-                        alt="Logo"
-                        src={"/logosales.png"}
-                        className="h-6"
-                      />
-                      Continue with Salesforce
-                    </a>
-                  </div>
+                                href="#"
+                                className="flex w-full items-center justify-center gap-3 rounded-md bg-[#f0f0f0] px-3 py-1.5 text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f0f0f0]"
+                            >
+                                <Image width={50} height={40} src={'/salesforce.svg'} alt='Salesforce Svg'/>
+                                <span className="text-sm font-semibold leading-6">Salesforce Authentication</span>
+                            </a>
+
+                            
+                        </div>
+                 
                 </div>
                 <div></div>
               </form>
