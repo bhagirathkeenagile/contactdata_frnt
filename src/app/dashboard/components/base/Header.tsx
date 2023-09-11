@@ -15,7 +15,7 @@ const Header = () => {
 
         <div className="flex justify-between items-center">
           <div className='flex items-center'>
-            <a href='#' className="header-links px-4 p-2 text-sm rounded mr-1">
+            <a href='/dashboard' className="header-links px-4 p-2 text-sm rounded mr-1">
               Dashboard
             </a>
 

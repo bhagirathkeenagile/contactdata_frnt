@@ -35,7 +35,7 @@ export default async function Home() {
               
             </a>
             <h1 className="pb-5 text-white text-2xl">
-              IT Asset Disposition (ITAD USA) Customer Portal
+              IT Asset Disposition (ITAD USA) Contact Data 
             </h1>
           </div>
           <div className="lg:absolute bottom-16">

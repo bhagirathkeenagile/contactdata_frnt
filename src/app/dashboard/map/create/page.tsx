@@ -333,8 +333,8 @@ const router = useRouter();
           body: JSON.stringify(importData), // Update data that you want to send
         });
         if (response) {
-           console.log("response", response);
-         // router.push("/dashboard/map")
+          console.log("response", response);
+          router.push("/dashboard/map")
         } else {
           console.error("Error creating post");
         }

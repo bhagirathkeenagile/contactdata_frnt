@@ -19,7 +19,7 @@ import Link from 'next/link'
 import Header from './Header';
 
 const dashboard = [
-  { name: 'Dashboard', href: '/', icon: SwatchIcon, current: false },
+  { name: 'Dashboard', href: '/dashboard', icon: SwatchIcon, current: false },
 ]
 
 const nav = [
