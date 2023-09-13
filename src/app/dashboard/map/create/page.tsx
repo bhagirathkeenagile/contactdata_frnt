@@ -269,7 +269,13 @@ const CreateNewMap = () => {
         })
       );
       setOptionData(optionData);
-      actionParam === "Import" ? nextStepImport() : nextStep();
+     // actionParam === "Import" ? nextStepImport() : nextStep();
+      if(actionParam==="Import"){
+        nextStep();
+      //  nextStep();
+      }else{
+        nextStep();
+      }
 
     }
   };
@@ -308,7 +314,8 @@ const CreateNewMap = () => {
         columnName: "",
       };
     });
-    setTargetFieldName([...selectedTableRows, ...unmappedRows]);
+    //setTargetFieldName([...selectedTableRows, ...unmappedRows]);
+    setTargetFieldName([...selectedTableRows]);
     nextStep();
   };
 const router = useRouter();
