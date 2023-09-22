@@ -334,6 +334,12 @@ input[type=number] {
   min-height: 50vh;
 }
 
+.loader-container_1 {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  min-height: 10vh;
+}
 
 .loader {
   border-top: 4px solid transparent;

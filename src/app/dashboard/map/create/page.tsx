@@ -6,9 +6,9 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 const importAction = [
-  { label: "Insert Only", value: "insert" },
-  { label: "Update", value: "update" },
   { label: "Insert And Update", value: "insert_update" },
+  { label: "Insert Only", value: "insert" },
+  { label: "Update", value: "update" },  
 ];
 
 const steps = [
@@ -88,6 +88,7 @@ const CreateNewMap = () => {
   const [selectedTableRows, setselectedTableRows] = useState([
     { table: "", name: "" },
   ]);
+  const [loading, setLoading] = useState(false);
   const [tableName, setTableName] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState(Array(excelRows));
   const [targetFieldName, setTargetFieldName] = useState<string | any>([
@@ -238,12 +239,12 @@ const CreateNewMap = () => {
           const formData = new FormData();
           formData.append("file", fileSelected);
           formData.append("targetTable", selectedValue.label);
-
+          setLoading(true);
           const response = await fetch(`${BASE_URL}/excel/upload`, {
             method: "POST",
             body: formData,
           });
-
+          setLoading(false);
           if (!response.ok) {
             throw new Error("Request failed with status: " + response.status);
           }
@@ -278,14 +279,28 @@ const CreateNewMap = () => {
       }
 
     }
+    setLoading(false);
   };
-
   const handleClickfor2ndpage = async () => {
+    
+
+    // Check for undefined values in selectedValues
+    if (selectedValues.some((item) => item === undefined)) {
+      console.log("Warning: selectedValues contains undefined values.");
+    }
+
     const selectedTableRows = selectedValues.map((item: any, index: any) => {
+      // Handle undefined values by skipping them
+
+      if (item === undefined) {
+        return null;
+      }
+      console.log("selectedValues = line 306 ==>", {
+        item: item,
+        index: index
+      });
       const [table, name] = item?.split("-");
       return {
-        //table: table.toLowerCase(),
-        //name: name.toLowerCase(),
         table: table,
         name: name,
         excelHeader: excelRows[index],
@@ -293,18 +308,44 @@ const CreateNewMap = () => {
         columnName: name,
       };
     });
+
+    const selectedTableRowsForEdit = [...selectedTableRows].map((item: any, index: any) => {
+
+      console.log("selectedTableRowsForEdit ==[ 324 ]==>", {
+        item: item,
+        index: index
+      })
+      if (item === undefined) {
+        return {
+          table: 'Contacts',
+          name: '',
+          excelHeader: excelRows[index],
+          mapped: "Unmapped",
+          columnName: '',
+        };
+      } else {
+        return item
+      }
+    })
+    console.log("selectedTableRowsForedit ==[line 321]==>", selectedTableRowsForEdit)
+
+
+    // Filter out null values (undefined elements)
+    const filteredSelectedTableRows = selectedTableRows.filter((item) => item !== null);
+
     const getUnmappedRows = optionData.filter((item: any) => {
       const isLargeNumber = (element: any) => {
         return (
           item.value.toLowerCase() ===
-          `${element.table.toLowerCase()}-${element.name.toLowerCase()}`.trim()
+          `${element?.table.toLowerCase()}-${element?.name.toLowerCase()}`.trim()
         );
       };
-      if (selectedTableRows.find(isLargeNumber) === undefined) {
+      if (filteredSelectedTableRows.find(isLargeNumber) === undefined) {
         return true;
       }
       return false;
     });
+
     const unmappedRows = getUnmappedRows.map((item: any) => {
       return {
         table: item.value.split("-")[0].toLowerCase(),
@@ -314,8 +355,12 @@ const CreateNewMap = () => {
         columnName: "",
       };
     });
-    //setTargetFieldName([...selectedTableRows, ...unmappedRows]);
-    setTargetFieldName([...selectedTableRows]);
+    console.log("targetfieldName ==[ line 311 ]==>", {
+      selectedTableRows: [...selectedTableRowsForEdit],
+      unmappedRows: [...unmappedRows]
+    })
+
+    setTargetFieldName([...selectedTableRowsForEdit, ...unmappedRows]);
     nextStep();
   };
 const router = useRouter();
@@ -510,6 +555,10 @@ const router = useRouter();
                     <div className="text-red-500">{errorMsgFileSelected}</div>
                   )}
                 </div>
+                {loading && (
+                <div className="loader-container_1">
+          <div className="loader"></div>File Uploading..
+        </div>)}
               </div>
 
               <div className="mt-2">
@@ -783,7 +832,7 @@ const router = useRouter();
                   
                 }}
               >
-                Next
+                Next 
               </button>
 
               <button
