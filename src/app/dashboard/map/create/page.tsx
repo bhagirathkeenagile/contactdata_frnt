@@ -805,7 +805,7 @@ const router = useRouter();
             </div>
 
             {/* here i have to map  */}
-            {console.log('excelRows---',excelRows)}
+          
             {excelRows.map((value, index) => (
               <div className="grid grid-cols-2 gap-4 border p-3" key={index}>
                 <div>
@@ -819,8 +819,6 @@ const router = useRouter();
                   />
                 </div>
                 <div>
-                  {console.log('optionData--',optionData.find(option => option.label))}
-                  {console.log('selectedValues--',selectedValues[value])}
                   <Select
                     className="basic-single"
                     classNamePrefix="select"
