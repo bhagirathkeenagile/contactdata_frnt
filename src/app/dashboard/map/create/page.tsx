@@ -299,6 +299,7 @@ const CreateNewMap = () => {
         item: item,
         index: index
       });
+      if (typeof item === 'string') {
       const [table, name] = item?.split("-");
       return {
         table: table,
@@ -307,6 +308,15 @@ const CreateNewMap = () => {
         mapped: "Mapped",
         columnName: name,
       };
+      }else{
+        return {
+          table: '',
+          name: '',
+          mapped: '',
+          columnName: '',
+        };
+      }
+      
     });
 
     const selectedTableRowsForEdit = [...selectedTableRows].map((item: any, index: any) => {
@@ -795,6 +805,7 @@ const router = useRouter();
             </div>
 
             {/* here i have to map  */}
+            {console.log('excelRows---',excelRows)}
             {excelRows.map((value, index) => (
               <div className="grid grid-cols-2 gap-4 border p-3" key={index}>
                 <div>
@@ -808,6 +819,8 @@ const router = useRouter();
                   />
                 </div>
                 <div>
+                  {console.log('optionData--',optionData.find(option => option.label))}
+                  {console.log('selectedValues--',selectedValues[value])}
                   <Select
                     className="basic-single"
                     classNamePrefix="select"
@@ -1004,7 +1017,7 @@ const router = useRouter();
                 </thead>
                 <tbody>
                   {targetFieldName.map((person: any, personIdx: any) => (
-                    <tr key={person.name} className="divide-x divide-gray-200">
+                    <tr key={person?.name} className="divide-x divide-gray-200">
                       <td
                         className={classNames(
                           personIdx !== people.length - 1
@@ -1013,7 +1026,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person.excelHeader}
+                        {person?.excelHeader}
                       </td>
                       <td
                         className={classNames(
@@ -1023,7 +1036,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person.table}
+                        {person?.table}
                       </td>
                       <td
                         className={classNames(
@@ -1033,7 +1046,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person.name}
+                        {person?.name}
                       </td>
                       <td
                         className={classNames(
@@ -1043,7 +1056,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person.mapped}
+                        {person?.mapped}
                       </td>
                     </tr>
                   ))}
