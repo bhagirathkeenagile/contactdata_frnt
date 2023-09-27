@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 const importAction = [
   { label: "Insert And Update", value: "insert_update" },
   { label: "Insert Only", value: "insert" },
-  { label: "Update", value: "update" },  
+  { label: "Update", value: "update" },
+  
 ];
 
 const steps = [
@@ -91,6 +92,7 @@ const CreateNewMap = () => {
   const [loading, setLoading] = useState(false);
   const [tableName, setTableName] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState(Array(excelRows));
+  const [editMappingData, setEditMappingData] = useState([]);
   const [targetFieldName, setTargetFieldName] = useState<string | any>([
     { table: "", name: "", excelHeader: "", mapped: "" },
   ]);
@@ -111,14 +113,14 @@ const CreateNewMap = () => {
   let url = null;
   // get INformation from Url
   if (typeof window !== 'undefined') {
-    url= new URL(window.location.href);
+    url = new URL(window.location.href);
   }
-  const searchParams = new URLSearchParams(url? url.search : '');
+  const searchParams = new URLSearchParams(url ? url.search : '');
   const actionParam = searchParams.get("action"); // provide about action 
   const idValue = searchParams.get("id");
   const mapUpdateid = idValue?.split(' ')[0]; // provide id from param 
 
-  
+
 
   // useefect for ruleset data 
   useEffect(() => {
@@ -145,7 +147,9 @@ const CreateNewMap = () => {
 
   }, []);
 
+  
   // useefect for action autofill
+  //const editMappingData: any[] = [];
   useEffect(() => {
 
     const fetchMapDataById = async () => {
@@ -179,8 +183,14 @@ const CreateNewMap = () => {
         // console.log("line [ 173 ] mapdedata==>", mapedData)
         setImportTable(mapedData)
         const mapedDataArray: any = mapedData.map((item: any) => {
+          //editMappingData[item.excelHeader] = `${item.table}-${item.columnName}`;
+          editMappingData.push({
+            value: item.excelHeader,
+            label: `${item.table}-${item.columnName}`
+          });
           return `${item.table}-${item.columnName}`
         })
+        console.log('editMappingData--',editMappingData);
         const concatenatedString = mapedDataArray.join(',');
         // console.log("mapedDataArray==[ line 137 ] =>", concatenatedString)
         // console.log("mapedData == [ line 138 ] =>", mapedData)
@@ -194,10 +204,22 @@ const CreateNewMap = () => {
     fetchMapDataById()
   }, [ruleSet, relationOptions])
 
+
+  function removeUndefinedValues(arr: any) {
+    const result = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] !== undefined) {
+        result[i] = arr[i];
+      }
+    }
+    return result;
+  }
+
   const handleSelectChangee = (index: any, selectedOption: any) => {
     const updatedValues = [...selectedValues];
     updatedValues[index] = selectedOption.label;
-    setSelectedValues(updatedValues);
+    const cleanedArray = removeUndefinedValues(updatedValues)
+    setSelectedValues(cleanedArray);
   };
 
   const handleMapNameChange = (event: any) => {
@@ -239,12 +261,12 @@ const CreateNewMap = () => {
           const formData = new FormData();
           formData.append("file", fileSelected);
           formData.append("targetTable", selectedValue.label);
-          setLoading(true);
+			setLoading(true);
           const response = await fetch(`${BASE_URL}/excel/upload`, {
             method: "POST",
             body: formData,
           });
-          setLoading(false);
+			 setLoading(false);
           if (!response.ok) {
             throw new Error("Request failed with status: " + response.status);
           }
@@ -270,17 +292,15 @@ const CreateNewMap = () => {
         })
       );
       setOptionData(optionData);
-     // actionParam === "Import" ? nextStepImport() : nextStep();
-      if(actionParam==="Import"){
-        nextStep();
-      //  nextStep();
-      }else{
-        nextStep();
-      }
+      actionParam === "Import" ? nextStepImport() : nextStep();
 
     }
-    setLoading(false);
+	 setLoading(false);
   };
+
+  ////////////////////////////////////////////////////////////////////////////////////
+
+
   const handleClickfor2ndpage = async () => {
     
 
@@ -298,8 +318,7 @@ const CreateNewMap = () => {
       console.log("selectedValues = line 306 ==>", {
         item: item,
         index: index
-      });
-      if (typeof item === 'string') {
+      })
       const [table, name] = item?.split("-");
       return {
         table: table,
@@ -308,15 +327,6 @@ const CreateNewMap = () => {
         mapped: "Mapped",
         columnName: name,
       };
-      }else{
-        return {
-          table: '',
-          name: '',
-          mapped: '',
-          columnName: '',
-        };
-      }
-      
     });
 
     const selectedTableRowsForEdit = [...selectedTableRows].map((item: any, index: any) => {
@@ -373,7 +383,57 @@ const CreateNewMap = () => {
     setTargetFieldName([...selectedTableRowsForEdit, ...unmappedRows]);
     nextStep();
   };
-const router = useRouter();
+
+
+  // const handleClickfor2ndpage = async () => {
+  //   const selectedTableRows = selectedValues.map((item: any, index: any) => {
+  //     const [table, name] = item?.split("-");
+  //     return {
+  //       //table: table.toLowerCase(),
+  //       //name: name.toLowerCase(),
+  //       table: table,
+  //       name: name,
+  //       excelHeader: excelRows[index],
+  //       mapped: "Mapped",
+  //       columnName: name,
+  //     };
+  //   });
+  //   const getUnmappedRows = optionData.filter((item: any) => {
+  //     const isLargeNumber = (element: any) => {
+  //       return (
+  //         item.value.toLowerCase() ===
+  //         `${element.table.toLowerCase()}-${element.name.toLowerCase()}`.trim()
+  //       );
+  //     };
+  //     if (selectedTableRows.find(isLargeNumber) === undefined) {
+  //       return true;
+  //     }
+  //     return false;
+  //   });
+  //   const unmappedRows = getUnmappedRows.map((item: any) => {
+  //     return {
+  //       table: item.value.split("-")[0].toLowerCase(),
+  //       name: item.value.split("-")[1].toLowerCase(),
+  //       excelHeader: "",
+  //       mapped: "Unmapped",
+  //       columnName: "",
+  //     };
+  //   });
+  //   console.log("targetfieldName ==[ line 311 ]==>", {
+  //     selectedTableRows: [...selectedTableRows],
+  //     unmappedRows: [...unmappedRows]
+  //   })
+  //   // setTargetFieldName([...selectedTableRows, ...unmappedRows]);
+  //   nextStep();
+  // };
+
+
+
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+
+  const router = useRouter();
   const importData = async () => {
     const importData = {
       name: mapName,
@@ -395,7 +455,7 @@ const router = useRouter();
           body: JSON.stringify(importData), // Update data that you want to send
         });
         if (response) {
-          console.log("response", response);
+          // console.log("response", response);
           router.push("/dashboard/map")
         } else {
           console.error("Error creating post");
@@ -414,7 +474,7 @@ const router = useRouter();
         if (response.ok) {
           console.log("Post created successfully");
           router.push("/dashboard/map")
-          
+
         } else {
           console.error("Error creating post");
         }
@@ -565,7 +625,7 @@ const router = useRouter();
                     <div className="text-red-500">{errorMsgFileSelected}</div>
                   )}
                 </div>
-                {loading && (
+				   {loading && (
                 <div className="loader-container_1">
           <div className="loader"></div>File Uploading..
         </div>)}
@@ -805,7 +865,6 @@ const router = useRouter();
             </div>
 
             {/* here i have to map  */}
-          
             {excelRows.map((value, index) => (
               <div className="grid grid-cols-2 gap-4 border p-3" key={index}>
                 <div>
@@ -827,9 +886,13 @@ const router = useRouter();
                     onChange={(selectedOption) =>
                       handleSelectChangee(index, selectedOption)
                     }
-                    value={optionData.find(option => option.label === selectedValues[index])}
+                    value={optionData.find(option => option.label === editMappingData.find(item => item.value === value)?.label)}
                     isDisabled={readOnlyForImport && actionParam === 'Import'}
                   />
+
+                 {console.log('editMappingData---->',editMappingData.find(item => item.value === value)?.label)}
+                
+                 
                 </div>
               </div>
             ))}
@@ -840,10 +903,10 @@ const router = useRouter();
                 className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 mr-4 px-4 py-2 text-xs text-white shadow-sm"
                 onClick={() => {
                   handleClickfor2ndpage();
-                  
+
                 }}
               >
-                Next 
+                Next
               </button>
 
               <button
@@ -1014,8 +1077,9 @@ const router = useRouter();
                   </tr>
                 </thead>
                 <tbody>
+                  {console.log('targetFieldName--->>>',targetFieldName)}
                   {targetFieldName.map((person: any, personIdx: any) => (
-                    <tr key={person?.name} className="divide-x divide-gray-200">
+                    <tr key={person.name} className="divide-x divide-gray-200">
                       <td
                         className={classNames(
                           personIdx !== people.length - 1
@@ -1024,7 +1088,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person?.excelHeader}
+                        {person.excelHeader}
                       </td>
                       <td
                         className={classNames(
@@ -1034,7 +1098,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person?.table}
+                        {person.table}
                       </td>
                       <td
                         className={classNames(
@@ -1044,7 +1108,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person?.name}
+                        {person.name}
                       </td>
                       <td
                         className={classNames(
@@ -1054,7 +1118,7 @@ const router = useRouter();
                           "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
                         )}
                       >
-                        {person?.mapped}
+                        {person.mapped}
                       </td>
                     </tr>
                   ))}

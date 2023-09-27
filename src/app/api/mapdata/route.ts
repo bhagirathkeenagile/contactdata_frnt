@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-const baseUrl =
-  process.env.BASE_URL || "https://contactwindos.azurewebsites.net";
+const baseUrl = process.env.BASE_URL || "http://localhost:5002";
 
 export async function GET(request: Request) {
   const response = await fetch(`${baseUrl}/map/ruleset`);
