@@ -92,7 +92,8 @@ const CreateNewMap = () => {
   const [loading, setLoading] = useState(false);
   const [tableName, setTableName] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState(Array(excelRows));
-  const [editMappingData, setEditMappingData] = useState([]);
+  //const [editMappingData, setEditMappingData] = useState([]);
+  const [editMappingData, setEditMappingData] = useState<{ value: any; label: string }[]>([]);
   const [targetFieldName, setTargetFieldName] = useState<string | any>([
     { table: "", name: "", excelHeader: "", mapped: "" },
   ]);
@@ -890,7 +891,7 @@ const CreateNewMap = () => {
                     isDisabled={readOnlyForImport && actionParam === 'Import'}
                   />
 
-                 {console.log('editMappingData---->',editMappingData.find(item => item.value === value)?.label)}
+                
                 
                  
                 </div>
