@@ -95,8 +95,9 @@ const CreateNewMap = () => {
   const [loading, setLoading] = useState(false);
   const [tableName, setTableName] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState(Array(excelRows));
-  //const [editMappingData, setEditMappingData] = useState([]);
+
   const [editMappingData, setEditMappingData] = useState<{ value: any; label: string }[]>([]);
+  const [uniqueeditMappingData, setuniqueeditMappingData] = useState<{ value: any; label: string }[]>([]);
   const [targetFieldName, setTargetFieldName] = useState<string | any>([
     { table: "", name: "", excelHeader: "", mapped: "" },
   ]);
@@ -153,7 +154,7 @@ const CreateNewMap = () => {
 
   
   // useefect for action autofill
-  //const editMappingData: any[] = [];
+
   useEffect(() => {
 
     const fetchMapDataById = async () => {
@@ -186,17 +187,22 @@ const CreateNewMap = () => {
         const mapedData = dataResponse.data.tableMappedData
         // console.log("line [ 173 ] mapdedata==>", mapedData)
         setImportTable(mapedData)
+        
+       
         const mapedDataArray: any = mapedData.map((item: any) => {
-          //editMappingData[item.excelHeader] = `${item.table}-${item.columnName}`;
-          editMappingData.push({
-            value: item.excelHeader,
-            label: `${item.table}-${item.columnName}`
-          });
+          const newValue = item.excelHeader;
+          const newLabel = `${item.table}-${item.columnName}`;
+          const exists = editMappingData.some((existingItem) => existingItem.value === newValue);
+          if (!exists) {
+            editMappingData.push({
+              value: newValue,
+              label: newLabel
+            });
+          }
           return `${item.table}-${item.columnName}`
-        })
-        console.log('editMappingData--',editMappingData);
+          })    
         const concatenatedString = mapedDataArray.join(',');
-        // console.log("mapedDataArray==[ line 137 ] =>", concatenatedString)
+         console.log("mapedDataArray==[ line 137 ] =>", editMappingData)
         // console.log("mapedData == [ line 138 ] =>", mapedData)
         setSelectedValues(mapedDataArray);
 
@@ -908,11 +914,9 @@ const CreateNewMap = () => {
                     onChange={(selectedOption) =>
                       handleSelectChangee(index, selectedOption)
                     }
-                    value={optionData.find(option => option.label === editMappingData.find(item => item.value === value)?.label)}
+                    value={optionData.find(option => option.value === editMappingData.find(item => item.value === value)?.label)}
                     isDisabled={readOnlyForImport && actionParam === 'Import'}
                   />
-
-                
                 
                  
                 </div>

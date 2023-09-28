@@ -57,9 +57,12 @@ export default function GetContact({ visible, onClose, filterVal }: any) {
 
   const exportContact = async () => {
     try {
-      if(filterVal.items.length > 0){
+      console.log('filterVal',filterVal)
+      if(filterVal.items.length < 0){
+        console.log('filterVal',filterVal)
         filterVal =null;
       }else{
+        console.log('filterVal',filterVal)
       const currentDateTime = new Date().toISOString();      
       const convertedData = convertToPrismaQuery(filterVal);
       const newConvertedData = JSON.stringify(convertedData)
