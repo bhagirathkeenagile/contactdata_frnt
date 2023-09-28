@@ -125,6 +125,36 @@ import { BASE_URL } from "../../../../utils";
       },
     ],
   },
+  {
+    caption: "Email",
+    name: "Email",
+    operators: [
+      {
+        caption: "Contains",
+        name: "contains",
+      },
+      {
+        caption: "Does Not Contain",
+        name: "doesNotContain",
+      },
+      {
+        caption: "Equals",
+        name: "=",
+      },
+      {
+        caption: "Does not Equal",
+        name: "<>",
+      },
+      {
+        caption: "More than",
+        name: ">",
+      },
+      {
+        caption: "Less than",
+        name: "<",
+      },
+    ],
+  },
 ];
 
  const groups = [
@@ -242,6 +272,7 @@ const ContactList = () => {
       { key: "Account", title: "Account", dataType: DataType.String },
       { key: "FirstName", title: "First Name", dataType: DataType.String },
       { key: "LastName", title: "Last Name", dataType: DataType.String },
+      { key: "Email", title: "Email", dataType: DataType.String },
       { key: "RingLeadScore", title: "RingLead Score", dataType: DataType.String },
     ];
   useEffect(() => {
@@ -377,6 +408,7 @@ const ContactList = () => {
                     Account: contact.Account?.Name,
                     FirstName: contact.FirstName,
                     LastName: contact.LastName,
+                    Email:  contact.Email,
                     RingLeadScore: contact.RingLead_Score__c,
                   };
                 })}

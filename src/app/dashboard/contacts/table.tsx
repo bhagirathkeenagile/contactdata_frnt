@@ -8,24 +8,28 @@ const people = [
     FirstName: "Walter",
     LastName: "	Mikitowicz",
     RingLeadScore: " 95.00",
+    Email:""
   },
   {
     Account: "30",
     FirstName: "Walter",
     LastName: "	Mikitowicz",
     RingLeadScore: " 95.00",
+    Email:""
   },
   {
     Account: "30",
     FirstName: "Walter",
     LastName: "	Mikitowicz",
     RingLeadScore: " 95.00",
+    Email:""
   },
   {
     Account: "30",
     FirstName: "Walter",
     LastName: "	Mikitowicz",
     RingLeadScore: " 95.00",
+    Email:""
   },
 ];
 
@@ -71,6 +75,20 @@ const ContactTable = () => {
                     >
                       <a href="#" className="group inline-flex w-32">
                         Last Name
+                        <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                          <ChevronDownIcon
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </a>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white bg-opacity-75 px-3 py-2 text-left text-sm font-semibold text-gray-900 backdrop-blur backdrop-filter lg:table-cell"
+                    >
+                      <a href="#" className="group inline-flex w-36">
+                        Email
                         <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
                           <ChevronDownIcon
                             className="h-5 w-5"
@@ -130,6 +148,16 @@ const ContactTable = () => {
                         )}
                       >
                         {person.LastName}
+                      </td>
+                      <td
+                        className={classNames(
+                          personIdx !== people.length - 1
+                            ? "border-b border-gray-200"
+                            : "",
+                          "whitespace-nowrap px-3 py-2 text-sm text-gray-500"
+                        )}
+                      >
+                        {person.Email}
                       </td>
                       <td
                         className={classNames(

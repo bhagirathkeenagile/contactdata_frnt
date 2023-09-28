@@ -11,7 +11,10 @@ const importAction = [
   { label: "Update", value: "update" },
   
 ];
-
+interface InputSelectValue {
+  input: string;
+  select: string;
+}
 const steps = [
   { id: "01", name: "Step 1", href: "#", status: "complete" },
   { id: "02", name: "Step 2", href: "#", status: "current" },
@@ -301,30 +304,48 @@ const CreateNewMap = () => {
 
   ////////////////////////////////////////////////////////////////////////////////////
 
-
+  const [inputSelectValues, setInputSelectValues] = useState<InputSelectValue[]>( [] );
   const handleClickfor2ndpage = async () => {
-    
+    const collectedValues: InputSelectValue[] = [];
+    excelRows.forEach((value, index) => {
+      const inputName = `field_${index}`;
+      const selectName = `color_${index}`;
+
+      const inputElement = document.getElementById(inputName) as HTMLInputElement;
+      const selectElement = document.getElementsByName(selectName)[0] as HTMLSelectElement;
+
+      if (inputElement && selectElement) {
+        const inputValue = inputElement.value;
+        const selectValue = selectElement.value;
+
+        if (selectValue.trim() !== '') {
+          collectedValues.push({
+            input: inputValue,
+            select: selectValue,
+          });
+        }
+      }
+    });
+
+    setInputSelectValues(collectedValues);
+    console.log('collectedValues 329-',collectedValues)
 
     // Check for undefined values in selectedValues
     if (selectedValues.some((item) => item === undefined)) {
       console.log("Warning: selectedValues contains undefined values.");
     }
 
-    const selectedTableRows = selectedValues.map((item: any, index: any) => {
-      // Handle undefined values by skipping them
-
-      if (item === undefined) {
+    const selectedTableRows = collectedValues.map((item: any, index: any) => {
+      console.log('item.select ',item.select)
+      if (item.select === '') {
         return null;
       }
-      console.log("selectedValues = line 306 ==>", {
-        item: item,
-        index: index
-      })
-      const [table, name] = item?.split("-");
+      
+      const [table, name] = item.select?.split("-");
       return {
         table: table,
         name: name,
-        excelHeader: excelRows[index],
+        excelHeader: item.input,
         mapped: "Mapped",
         columnName: name,
       };
