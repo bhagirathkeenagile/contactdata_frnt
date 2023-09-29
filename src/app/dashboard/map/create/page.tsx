@@ -227,8 +227,18 @@ const CreateNewMap = () => {
 
   const handleSelectChangee = (index: any, selectedOption: any) => {
     const updatedValues = [...selectedValues];
-    updatedValues[index] = selectedOption.label;
+    if(selectedOption){
+      updatedValues[index] = selectedOption.label;
+    }else{
+      const inputName = `field_${index}`;
+      const inputElement = document.getElementById(inputName) as HTMLInputElement;
+      console.log('index',index,'updatedValues[index]',inputElement.value)
+      const updatedData = editMappingData.filter(item => item.value !== inputElement.value);
+      setEditMappingData(updatedData);
+     console.log('test', updatedData)
+    }
     const cleanedArray = removeUndefinedValues(updatedValues)
+    console.log('cleanedArray',cleanedArray)
     setSelectedValues(cleanedArray);
   };
 
@@ -313,6 +323,7 @@ const CreateNewMap = () => {
   const [inputSelectValues, setInputSelectValues] = useState<InputSelectValue[]>( [] );
   const handleClickfor2ndpage = async () => {
     const collectedValues: InputSelectValue[] = [];
+    const excelnotselectedValues: InputSelectValue[] = [];
     excelRows.forEach((value, index) => {
       const inputName = `field_${index}`;
       const selectName = `color_${index}`;
@@ -330,11 +341,17 @@ const CreateNewMap = () => {
             select: selectValue,
           });
         }
+        else{
+          excelnotselectedValues.push({
+            input: inputValue,
+            select: selectValue,
+          });
+        }
       }
     });
 
     setInputSelectValues(collectedValues);
-    console.log('collectedValues 329-',collectedValues)
+    console.log('collectedValues 329-',excelnotselectedValues)
 
     // Check for undefined values in selectedValues
     if (selectedValues.some((item) => item === undefined)) {
@@ -356,7 +373,15 @@ const CreateNewMap = () => {
         columnName: name,
       };
     });
-
+    const notselected =excelnotselectedValues.map((item: any, index: any) => {
+      return {
+        table: '',
+        name: '',
+        excelHeader: item.input,
+        mapped: "Unmapped",
+        columnName: '',
+      };
+    })
     const selectedTableRowsForEdit = [...selectedTableRows].map((item: any, index: any) => {
 
       console.log("selectedTableRowsForEdit ==[ 324 ]==>", {
@@ -408,7 +433,7 @@ const CreateNewMap = () => {
       unmappedRows: [...unmappedRows]
     })
 
-    setTargetFieldName([...selectedTableRowsForEdit, ...unmappedRows]);
+    setTargetFieldName([...selectedTableRowsForEdit,...notselected]);
     nextStep();
   };
 
@@ -916,6 +941,7 @@ const CreateNewMap = () => {
                     }
                     value={optionData.find(option => option.value === editMappingData.find(item => item.value === value)?.label)}
                     isDisabled={readOnlyForImport && actionParam === 'Import'}
+                    isClearable={true}
                   />
                 
                  
