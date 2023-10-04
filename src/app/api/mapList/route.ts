@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-const baseUrl = "https://contactwindos.azurewebsites.net";
+const baseUrl = "http://contactdatab.keenagile.in";
 
 export async function GET(request: Request) {
   try {
