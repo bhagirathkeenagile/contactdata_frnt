@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-const baseUrl = process.env.BASE_URL || "http://contactdatab.keenagile.in";
+const baseUrl = process.env.BASE_URL || "https://contactdatab.keenagile.in";
 
 export async function GET(request: Request) {
   // const response = await axios.get(`${baseUrl}/permisions/listPermissions`);
