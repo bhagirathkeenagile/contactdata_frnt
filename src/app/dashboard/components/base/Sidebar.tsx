@@ -49,6 +49,7 @@ const Sidebar = () => {
   console.log("data", session);
   console.log("status", status);
   const name = session?.user?.name;
+  const email = session?.user?.email;
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);

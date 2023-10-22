@@ -11,7 +11,7 @@ function CustomPagination({ totalPages, currentPage, onPageChange }:any) {
     onPageChange(newPage);
   };
 
-  const pageRangeDisplayed = 5;
+  const pageRangeDisplayed = 10;
   const halfRange = Math.floor(pageRangeDisplayed / 2);
 
   const minPageNumber = Math.max(currentPage - halfRange, 1);

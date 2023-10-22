@@ -4,6 +4,7 @@ import Select from "react-select";
 import { BASE_URL } from "../../../../../utils";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const importAction = [
   { label: "Insert And Update", value: "insert_update" },
@@ -82,7 +83,7 @@ const CreateNewMap = () => {
     setStep((prevStep) => prevStep - 1);
   };
 
-
+  const { data: session, status } = useSession();
   const [mapName, setMapName] = useState("");
   const [relationOptions, setRelationOptions] = useState<any[]>([]);
   const [selectedValue, setSelectedValue] = useState({ label: "Accounts" });
@@ -125,8 +126,8 @@ const CreateNewMap = () => {
   const idValue = searchParams.get("id");
   const mapUpdateid = idValue?.split(' ')[0]; // provide id from param 
 
-
-
+  const email = session?.user?.email;
+  console.log('emailemail--',email);
   // useefect for ruleset data 
   useEffect(() => {
     const fetchData = async () => {
@@ -487,6 +488,7 @@ const CreateNewMap = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////
 
   const router = useRouter();
+  
   const importData = async () => {
     const importData = {
       name: mapName,
@@ -496,6 +498,7 @@ const CreateNewMap = () => {
       status: "uploaded",
       action: action.label,
       isDeleted: false,
+      email: email,
     };
     try {
       // if action is Import or edit then update api hit
@@ -678,6 +681,7 @@ const CreateNewMap = () => {
                     <div className="text-red-500">{errorMsgFileSelected}</div>
                   )}
                 </div>
+                <p>As of now maximum 15k records can be uploaded</p>
 				   {loading && (
                 <div className="loader-container_1">
           <div className="loader"></div>File Uploading..

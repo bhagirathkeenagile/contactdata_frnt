@@ -251,7 +251,7 @@ const MapList = () => {
               paging={{
                 enabled: true,
                 pageIndex: 0,
-                pageSize: 10,
+                pageSize: 1,
                 pageSizes: [5, 10, 15],
                 position: PagingPosition.Bottom,
               }}

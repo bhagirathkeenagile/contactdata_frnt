@@ -430,22 +430,22 @@ const ContactList = () => {
             <div className="pagination-controls flex justify-between p-2">
               <div className="page-size-options">
                 <button
-                  className={`page-size-option ${pageSize === 5 ? "selected" : ""}`}
-                  onClick={() => handlePageSizeChange(5)}
-                >
-                  5
-                </button>
-                <button
                   className={`page-size-option ${pageSize === 10 ? "selected" : ""}`}
                   onClick={() => handlePageSizeChange(10)}
                 >
                   10
                 </button>
                 <button
-                  className={`page-size-option ${pageSize === 15 ? "selected" : ""}`}
-                  onClick={() => handlePageSizeChange(15)}
+                  className={`page-size-option ${pageSize === 50 ? "selected" : ""}`}
+                  onClick={() => handlePageSizeChange(50)}
                 >
-                  15
+                  50
+                </button>
+                <button
+                  className={`page-size-option ${pageSize === 100 ? "selected" : ""}`}
+                  onClick={() => handlePageSizeChange(100)}
+                >
+                  100
                 </button>
               </div>
               <CustomPagination
