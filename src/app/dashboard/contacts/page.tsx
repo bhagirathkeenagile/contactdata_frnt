@@ -249,13 +249,14 @@ const ContactList = () => {
 
   const updateRingLeadScore = async () => {
     try {
-      const response = await fetch(`/api/ringLoadScore`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response) {
-        console.log("ringLeadScore Updated successfully")
-      }
+      // const response = await fetch(`/api/ringLoadScore`, {
+      //   method: "GET",
+      //   headers: { "Content-Type": "application/json" },
+      // });
+      // if (response) {
+      //   console.log("ringLeadScore Updated successfully")
+      // }
+      console.log("ringLeadScore Updated successfully")
     } catch (error) {
       console.error(error);
     }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const baseUrl = process.env.BASE_URL || "http://localhost:5002";
+const baseUrl = process.env.BASE_URL || "http://iucontactdatab.keenagile.in";
 
 export async function GET(request: Request) {
   const response = await fetch(`${baseUrl}/map/get-account`, {
