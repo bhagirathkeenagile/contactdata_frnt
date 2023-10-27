@@ -4,7 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import axios from 'axios';
 import { convertToPrismaQuery } from './queryconverter';
-const baseUrl = "http://iucontactdatab.keenagile.in";
+const baseUrl = "https://iucontactdatab.keenagile.in";
 export default function GetContact({ visible, onClose, filterVal }: any) {
 
    console.log("GetContact line 9 ==>")
