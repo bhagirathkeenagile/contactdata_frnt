@@ -139,6 +139,7 @@ const CreateNewMap = () => {
         });
         const data = await response.json();
         setRuleSet(data.body.tables);
+        console.log('data.body.tables',data.body.tables)
         data.body.tables.map((item: any) => {
           if (item.displayPublic) {
             if (tableName.includes(item.name)) return;

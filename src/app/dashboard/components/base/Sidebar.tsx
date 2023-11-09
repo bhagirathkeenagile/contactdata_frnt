@@ -112,30 +112,35 @@ const Sidebar = () => {
                   alt="Precedent Logo"
                   className="h-6 opacity-95"
                 /> */}
-                    <h1 className='text-white text-lg'>Logo</h1>
+                <img
+                src={"/logo.png"}
+                alt="Precedent Logo"
+                className="h-10 opacity-95"
+              /> 
+                    {/* <h1 className='text-white text-lg'>Logo</h1> */}
 
                   </div>
                   <nav className="flex flex-1 flex-col">
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                      <li>
-                        <ul role="list" className="-mx-2 space-y-1">
-                          {dashboard.map((dashboard) => (
-                            <li key={dashboard.name}>
+                        {/* <li>
+                          <ul role="list" className="-mx-2 space-y-1">
+                            {dashboard.map((dashboard) => (
+                              <li key={dashboard.name}>
 
-                              <a
-                                href={dashboard.href}
-                                className={classNames(
-                                  dashboard.current ? 'bg-gray-50' : 'hover:bg-gray-700',
-                                  'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-normal text-gray-200'
-                                )}
-                              >
-                                <dashboard.icon className="h-6 w-6 shrink-0 text-gray-400" aria-hidden="true" />
-                                {dashboard.name}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
+                                <a
+                                  href={dashboard.href}
+                                  className={classNames(
+                                    dashboard.current ? 'bg-gray-50' : 'hover:bg-gray-700',
+                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-normal text-gray-200'
+                                  )}
+                                >
+                                  <dashboard.icon className="h-6 w-6 shrink-0 text-gray-400" aria-hidden="true" />
+                                  {dashboard.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </li> */}
                       <li>
                         <ul role="list" className="-mx-2 space-y-1">
                           {nav.map((nav) => (
@@ -156,7 +161,7 @@ const Sidebar = () => {
                         </ul>
                       </li>
 
-                      <li>
+                      {/* <li>
                         <ul role="list" className="-mx-2 space-y-1">
                           {ar.map((ar) => (
                             <li key={ar.name}>
@@ -174,7 +179,7 @@ const Sidebar = () => {
                             </li>
                           ))}
                         </ul>
-                      </li>
+                      </li> */}
 
                     </ul>
                   </nav>
@@ -195,11 +200,16 @@ const Sidebar = () => {
                   alt="Precedent Logo"
                   className="h-6 opacity-95"
                 /> */}
-            <h1 className='text-white text-lg'>Logo</h1>
+            {/* <h1 className='text-white text-lg'>Logo</h1> */}
+            <img
+                src={"/logo.png"}
+                alt="Precedent Logo"
+                className="h-10 opacity-95"
+              /> 
           </div>
           <nav className="flex flex-1 flex-col  px-6">
             <ul role="list" className="flex flex-1 flex-col gap-y-4">
-              <li>
+              {/* <li>
                 <ul role="list" className="-mx-2 mt-2 space-y-1">
                   {dashboard.map((dashboard) => (
                     <li key={dashboard.name}>
@@ -219,9 +229,9 @@ const Sidebar = () => {
                     </li>
                   ))}
                 </ul>
-              </li>
+              </li> */}
               <li>
-                <div className="text-xs font-normal leading-6 text-gray-400">USER VIEW</div>
+                {/* <div className="text-xs font-normal leading-6 text-gray-400">USER VIEW</div> */}
                 <ul role="list" className="-mx-2 mt-2 space-y-1 pb-4">
                   {nav.map((nav) => (
                     <li key={nav.name}>
@@ -244,7 +254,7 @@ const Sidebar = () => {
                   ))}
                 </ul>
               </li>
-              <li>
+              {/* <li>     
                 <div className="text-xs font-normal leading-6 text-gray-400">AR ADMIN VIEW</div>
                 <ul role="list" className="-mx-2 mt-2 space-y-1 pb-4">
                   {ar.map((ar) => (
@@ -267,7 +277,7 @@ const Sidebar = () => {
                     </li>
                   ))}
                 </ul>
-              </li>
+              </li> */}
 
             </ul>
           </nav>
@@ -281,9 +291,9 @@ const Sidebar = () => {
           </button>
           <div className="flex justify-between items-center">
             <div className='flex items-center'>
-              <a href='#' className="header-links px-4 p-2 text-sm rounded mr-1 hidden xl:block">
+              {/* <a href='#' className="header-links px-4 p-2 text-sm rounded mr-1 hidden xl:block">
                 Dashboard
-              </a>
+              </a> */}
 
             </div>
             <div>
@@ -291,11 +301,11 @@ const Sidebar = () => {
                 <a href="#" className="group block flex-shrink-0" onClick={toggleDropdown}>
                   <div className="flex items-center">
                     <div>
-                      <img
+                      {/* <img
                         className="inline-block h-9 w-9 rounded-full"
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                         alt=""
-                      />
+                      /> */}
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{name?name:"USER"}</p>
