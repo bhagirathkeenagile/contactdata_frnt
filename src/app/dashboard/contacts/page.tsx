@@ -363,7 +363,7 @@ const ContactList = () => {
        
         const test='{"AND":[{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},"NOT":{"OR":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(AllBrands)Suppress Cold Only","(AllBrands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"'+thirtyDaysAgo+'"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"'+twoseventydaysAgo+'"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Teladvance (First Contact)"}},{"Persona__c":""},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"'+sixtydaysAgo+'"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Teladvance"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"'+thirtyDaysAgo+'"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Teladvance"}}}]}]}]}';
         console.log("requestData");
-      let response;
+      let response:any;
       if (appltyfilter1) {
         console.log("appltyfilter", appltyfilter);
         response = await axios.post(
@@ -388,19 +388,19 @@ const ContactList = () => {
           );}
       }
       console.log("testing 223", response);
-      if (response.status === 201) {
+      if (response!.status === 201) {
         setDisablebutton(false);
       }
-      if (response.status === 201 || response.status === 200) {
+      if (response!.status === 201 || response!.status === 200) {
         setIsLoading(false)
-        setPages(response.data.totalContacts);
-        console.log("response12", response.data.contacts);
-        const result = await response.data.contacts;
+        setPages(response!.data.totalContacts);
+        console.log("response12", response!.data.contacts);
+        const result = await response!.data.contacts;
         setData(result);
 
         // setPages(response.data.totalContacts)
         setUsers(
-          response.data.contacts.map((contact: any) => {
+          response!.data.contacts.map((contact: any) => {
             return {
               id: contact.id,
               Account: contact.Account?.Name,
