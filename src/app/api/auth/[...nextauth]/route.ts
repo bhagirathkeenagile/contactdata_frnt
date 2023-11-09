@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 const handler = NextAuth({
   session: {
     strategy: "jwt",
-   // maxAge: 60 * 10, // 10 minutes
+    // maxAge: 60 * 10, // 10 minutes
   },
   providers: [
     // @bhagirath :: TODO Add salesforce provider and remove credentials provider
@@ -12,27 +12,29 @@ const handler = NextAuth({
       clientId: process.env.SALESFORCE_CLIENT_ID || "client_id",
       clientSecret: process.env.SALESFORCE_CLIENT_SECRET || "client_secret",
       wellKnown: process.env.SALESFORCE_URL_LOGIN || "well_known",
-      idToken: true,      
+      idToken: true,
       userinfo: {
         async request({ provider, tokens, client }) {
-          if (typeof provider.userinfo === 'string') {
+          if (typeof provider.userinfo === "string") {
             // Handle the case where provider.userinfo is a string
             return await client.userinfo(tokens as any, {
               // You can choose to include some default parameters or handle it differently
             });
-          } else if (typeof provider.userinfo === 'object' && provider.userinfo !== null) {
+          } else if (
+            typeof provider.userinfo === "object" &&
+            provider.userinfo !== null
+          ) {
             // Handle the case where provider.userinfo is an object (UserinfoEndpointHandler)
             return await client.userinfo(tokens as any, {
               params: provider.userinfo.params,
             });
           } else {
             // Handle other cases or throw an error if necessary
-            throw new Error('Invalid provider.userinfo type');
+            throw new Error("Invalid provider.userinfo type");
           }
         },
       },
-      
-      
+
       profile(profile) {
         return { id: profile.email, ...profile };
       },
@@ -78,7 +80,7 @@ const handler = NextAuth({
       console.log("account", account);
       console.log("profile", profile);
       console.log("email", email);
-      console.log("credentials", credentials)
+      console.log("credentials", credentials);
       return true;
       // const isAllowedToSignIn = true;
       // if (isAllowedToSignIn) {
@@ -92,6 +94,7 @@ const handler = NextAuth({
       //   // return '/unauthorized'
       // }
     },
+
     // jwt: async ({ token, user }: any) => {
     //   // hit api and get user info
     //   // get salesforce response

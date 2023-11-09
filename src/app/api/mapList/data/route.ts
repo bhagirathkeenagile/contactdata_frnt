@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
-const baseUrl = "https://iucontactdatab.keenagile.in";
+const baseUrl = "http://localhost:5002";
 
 export async function GET(request: Request) {
   try {

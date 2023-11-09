@@ -1,18 +1,35 @@
 "use client";
+import React from "react";
 import GetContact from "./model/getContacts";
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState, useCallback } from "react";
 import HeaderDropdown from "./filters/headerDropdown";
-import { DataType, Table } from "ka-table";
-import { SortingMode, PagingPosition, EditingMode } from "ka-table/enums";
 import FilterControl from "react-filter-control";
 import { IFilterControlFilterValue } from "react-filter-control/interfaces";
 import { filterData } from "./filterData";
-import CustomPagination from "./custompageination";
+import { ChevronDownIcon } from "./icons";
 import axios from "axios";
 import { BASE_URL } from "../../../../utils";
-
-
- const fields = [
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Input,
+  Pagination,
+  Spinner,
+  getKeyValue,
+  SortDescriptor,
+  Button,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/react";
+import { User, columns, renderCell } from "./columns";
+import { convertToPrismaQuery } from "./model/queryconverter";
+const fields = [
   {
     caption: "First Name",
     name: "FirstName",
@@ -93,14 +110,6 @@ import { BASE_URL } from "../../../../utils";
         caption: "Does not Equal",
         name: "<>",
       },
-      {
-        caption: "More than",
-        name: ">",
-      },
-      {
-        caption: "Less than",
-        name: "<",
-      },
     ],
   },
   {
@@ -157,7 +166,7 @@ import { BASE_URL } from "../../../../utils";
   },
 ];
 
- const groups = [
+const groups = [
   {
     caption: "And",
     name: "and",
@@ -167,7 +176,42 @@ import { BASE_URL } from "../../../../utils";
     name: "or",
   },
 ];
- const filter: IFilterControlFilterValue = {
+const people = [
+  {
+    Id: "1",
+    Account: "First Account",
+    FirstName: "Walter",
+    LastName: "	Mikitowicz",
+    RingLeadScore: " 95.00",
+    Email: "",
+  },
+  {
+    Id: "2",
+    Account: "First Account",
+    FirstName: "Walter",
+    LastName: "	Mikitowicz",
+    RingLeadScore: " 95.00",
+    Email: "",
+  },
+  {
+    Id: "3",
+    Account: "Second Account",
+    FirstName: "Walter 2",
+    LastName: "	Mikitowicz",
+    RingLeadScore: " 95.00",
+    Email: "",
+  },
+  {
+    Id: "4",
+    Account: "Second Account",
+    FirstName: "Walter 2",
+    LastName: "	Mikitowicz",
+    RingLeadScore: " 95.00",
+    Email: "",
+  },
+];
+
+const filter: IFilterControlFilterValue = {
   groupName: "and",
   items: [],
 };
@@ -176,153 +220,361 @@ const ContactList = () => {
   const [showMyModal, setShowMyModel] = useState(false);
   const handleOnClose = () => setShowMyModel(false);
   const [filterValue, changeFilter] = useState<any>(filter);
-  const [headerData, setheaderData] = useState([])
+  const [filterValueforexcel, changeFilterforexcel] = useState<any>();
+  const [filtercontactdata, setfiltercontactdata] = useState<any>(false);
+  const [appltyfilter, setappltyfilter] = useState<any>(false);
+  const [standardfiltervalue,setstandardfiltervalue]=useState('');
+  const [statusFilter, setStatusFilter] = React.useState(
+    new Set(["All_Contacts"])
+  );
+  const statusOptions = [
+    { name: "Avail Contacts", uid: "Avail_Contacts" },
+    { name: "TelAdvance Contacts", uid: "TelAdvance_Contacts" },
+    { name: "All Contacts", uid: "All_Contacts" },
+  ];
   const onFilterChanged = (newFilterValue: IFilterControlFilterValue) => {
     changeFilter(newFilterValue);
+    // setfiltercontactdata(true);
+    setDisablebutton(false);
+    // console.log("test pass", filterValue.items[0].value);
+    if (filterValue.items[0]?.value !== "") {
+      // setfiltercontactdata(true);
+    } else {
+      setfiltercontactdata(false);
+      setappltyfilter(false);
+      fetchPageData(page, appltyfilter, newFilterValue,'All Contacts');
+    }
   };
-  const [contacts, setContacts] = useState<any>([]);
-  const [loading, setLoading] = useState(true);
-  const [showTableHeader, setShowTableHeader] = useState<any>([])
-  const [tableData, setTableData] = useState<any>([])
   const [currentPage, setCurrentPage] = useState(1); // 1-based index
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-
-  async function fetchData(pageIndex: any, pageSize: any) {
-    try {
-      const response = await axios.get(`${BASE_URL}/map/get-contacts?page=${pageIndex}&pageSize=${pageSize}`);
-      if (response.status === 200) {
-        const data = response.data;
-        allContactData()
-        setContacts(data.contacts);
-        setTotalPages(Math.ceil(data.totalContacts / pageSize));
-        setLoading(false);
-      } else {
-        console.error("Failed to fetch data");
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  }
-
-  async function allContactData() {
-    try {
-      const response = await axios.get(`${BASE_URL}/map/list-contactData`);
-      if (response.status === 200) {
-        const data = response.data;
-        if ((filterValue.items[0])?.value.length > 0) {
-          console.log("from if setContacts(data.contacts);")
-          setContacts(data.contacts);
-        }
-        setLoading(false);
-      } else {
-        console.error("Failed to fetch data");
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  }
-
+  const [disablebutton, setDisablebutton] = useState(true);
+  const [page, setPage] = React.useState(1);
+  const [pagescount, setPages] = React.useState(10);
+  const [data, setData] = useState<any>([]);
+  const [users, setUsers] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState(null);
+  const rowsPerPage: number = 10;
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+    column: "name",
+    direction: "ascending",
+  });
+  const pages: number = useMemo(() => {
+    return Math.ceil(pagescount / rowsPerPage);
+  }, [pagescount, rowsPerPage]);
   useEffect(() => {
-    fetchData(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    console.log('standardfiltervalue 266',standardfiltervalue);
+    setIsLoading(true);
+    setError(null);
+    if(!standardfiltervalue){
+    fetchPageData(page, filtercontactdata, filterValue,'All Contacts');
+    }
+  }, [page]);
 
+  const loadingState: "loading" | "idle" =
+    isLoading || (users && users.length === 0) ? "loading" : "idle";
+  const [filterValue1, setFilterValue] = useState("");
+  const hasSearchFilter = Boolean(filterValue1);
+  const filteredItems = useMemo(() => {
+    let filteredUsers = [...users];
+    console.log("memo call", hasSearchFilter);
+    if (hasSearchFilter) {
+      console.log("inside memo");
+      filteredUsers = filteredUsers.filter(
+        (user) =>
+          user.FirstName.toLowerCase().includes(filterValue1.toLowerCase()) ||
+          user.LastName.toLowerCase().includes(filterValue1.toLowerCase())
+      );
+    }
+    console.log("inside memo", filteredUsers.length);
+    return filteredUsers;
+  }, [users, filterValue1, hasSearchFilter]);
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
 
-  // Function to handle page change
-  const handlePageChange = (newPage: any) => {
-    setCurrentPage(newPage);
+    return filteredItems.slice(start, end);
+  }, [page, filteredItems]);
+  const currentDate = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(currentDate.getDate()-30);
+  thirtyDaysAgo.toISOString().split("T")[0];
+  const sixtydaysAgo = new Date();
+  sixtydaysAgo.setDate(currentDate.getDate()-60);
+  sixtydaysAgo.toISOString().split("T")[0];
+  const twoseventydaysAgo = new Date();
+  twoseventydaysAgo.setDate(currentDate.getDate()-270);
+  twoseventydaysAgo.toISOString().split("T")[0];
+  const dateThreshold = new Date("2020-12-31T00:00:00Z");
+ 
+  const handleStanadardFilter = (status: any) => {
+    setStatusFilter(status);
+    console.log("standard filter", Array.from(status).join(", ").replaceAll("_", " "));
+    setstandardfiltervalue(Array.from(status).join(", ").replaceAll("_", " "))
+    fetchPageData(page, filtercontactdata, filterValue,Array.from(status).join(", ").replaceAll("_", " "));
   };
+  const selectedValue = React.useMemo(
+    () => Array.from(statusFilter).join(", ").replaceAll("_", " "),
+    [statusFilter]
+  );
+  const fetchPageData = async (
+    page: number,
+    appltyfilter1: boolean,
+    filterValue: any,
+    standardfilter:string
+  ) => {
+    setDisablebutton(true);
+    console.log("test 1111", standardfiltervalue);
+    try {
+      setIsLoading(true);
+      const convertedData = convertToPrismaQuery(filterValue);
+      const newConvertedData = JSON.stringify(convertedData).replaceAll(
+        "RingLeadScore",
+        "RingLead_Score__c"
+      );
+      console.log('test 222');
+      const AvailContacts =
+        '{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Avail) Suppress Cold Only","(Avail) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
+        twoseventydaysAgo.toISOString() +
+        '"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Avail (First Contact)"}},{"Persona__c":null},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        sixtydaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Avail"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Avail"}}}]}]},{"created_at":{"gte":"' +
+        dateThreshold.toISOString() +
+        '"}}]}]}';
+      const teladvanceContacts =
+        '{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
+        twoseventydaysAgo.toISOString() +
+        '"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Teladvance (First Contact)"}},{"Persona__c":""},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        sixtydaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Teladvance"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Teladvance"}}}]}]}]}]}';
+       
+        const test='{"AND":[{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},"NOT":{"OR":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(AllBrands)Suppress Cold Only","(AllBrands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"'+thirtyDaysAgo+'"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"'+twoseventydaysAgo+'"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Teladvance (First Contact)"}},{"Persona__c":""},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"'+sixtydaysAgo+'"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Teladvance"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"'+thirtyDaysAgo+'"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Teladvance"}}}]}]}]}';
+        console.log("requestData");
+      let response;
+      if (appltyfilter1) {
+        console.log("appltyfilter", appltyfilter);
+        response = await axios.post(
+          `${BASE_URL}/map/list-contactData-filter?page=${page}&pageSize=${rowsPerPage}`,
+          {filterval: newConvertedData,filterseconf: "1",}
+        );
+      } else {
+        console.log('selectedValue',standardfilter)
+        if(standardfilter=='Avail Contacts'){
+          response = await axios.post(
+            `${BASE_URL}/map/list-contactData-filter?page=${page}&pageSize=${rowsPerPage}`,
+            {filterval: AvailContacts,filterseconf: "1",}
+          );}
+        if(standardfilter=='TelAdvance Contacts'){
+          response = await axios.post(
+            `${BASE_URL}/map/list-contactData-filter?page=${page}&pageSize=${rowsPerPage}`,
+            {filterval: teladvanceContacts,filterseconf: "1",}
+          );}
+         if(standardfilter=='All Contacts'){
+          response = await axios.get(
+            `${BASE_URL}/map/get-contacts?page=${page}&pageSize=${rowsPerPage}`
+          );}
+      }
+      console.log("testing 223", response);
+      if (response.status === 201) {
+        setDisablebutton(false);
+      }
+      if (response.status === 201 || response.status === 200) {
+        setIsLoading(false)
+        setPages(response.data.totalContacts);
+        console.log("response12", response.data.contacts);
+        const result = await response.data.contacts;
+        setData(result);
 
-
-  // Function to handle page size change
-  const handlePageSizeChange = (newSize: any) => {
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to the first page when changing page size
+        // setPages(response.data.totalContacts)
+        setUsers(
+          response.data.contacts.map((contact: any) => {
+            return {
+              id: contact.id,
+              Account: contact.Account?.Name,
+              FirstName: contact.FirstName,
+              LastName: contact.LastName,
+              Email: contact.Email,
+              RingLeadScore: contact.RingLead_Score__c,
+            };
+          })
+        );
+        console.log("users 240", users);
+      } else {
+        throw new Error(`HTTP error! Status: ${response}`);
+      }
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+  const getincludedcontact =()=>{
+    const convertedData = convertToPrismaQuery(filterValue);
+    const newConvertedData = JSON.stringify(convertedData).replaceAll(
+      "RingLeadScore",
+      "RingLead_Score__c"
+    );
+    const AvailContacts =
+        '{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Avail) Suppress Cold Only","(Avail) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
+        twoseventydaysAgo.toISOString() +
+        '"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Avail (First Contact)"}},{"Persona__c":null},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        sixtydaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Avail"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Avail"}}}]}]},{"created_at":{"gte":"' +
+        dateThreshold.toISOString() +
+        '"}}]}]}';
+      const teladvanceContacts =
+        '{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
+        twoseventydaysAgo.toISOString() +
+        '"}}},{"Low_Grade_Title__c":false},{"Completed_Marketing_Segment__c":{"contains":"Teladvance (First Contact)"}},{"Persona__c":""},{"Business_Unit__c":{"not":{"equals":"ECHG"}}},{"OR":[{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        sixtydaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"contains":"Teladvance"}}]},{"AND":[{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Last_Quickmail_Checkpoint__c":{"not":{"contains":"Teladvance"}}}]}]}]}]}';
 
-
-
-
+        const allContact = '{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"export_status":null}]}]}';
+        const test='{"AND":[' +
+        newConvertedData +
+        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        thirtyDaysAgo.toISOString() +
+        '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Low_Grade_Title__c":false},{"Most_Recent_Marketing_Action__c":{"lt":"' +
+        sixtydaysAgo.toISOString() +
+        '"}}]}]}';
+        if(standardfiltervalue=='Avail Contacts'){
+          changeFilterforexcel(test)
+          setShowMyModel(true)
+        }
+        else if(standardfiltervalue=='TelAdvance Contacts'){
+          changeFilterforexcel(teladvanceContacts)
+          setShowMyModel(true)
+        }
+        else{
+          changeFilterforexcel(allContact)
+          setShowMyModel(true)
+        }
+       
+  }
+  const [ringleadupdate, setRingleadupdate] = useState(false);
   const updateRingLeadScore = async () => {
     try {
-      // const response = await fetch(`/api/ringLoadScore`, {
-      //   method: "GET",
-      //   headers: { "Content-Type": "application/json" },
-      // });
-      // if (response) {
-      //   console.log("ringLeadScore Updated successfully")
-      // }
-      console.log("ringLeadScore Updated successfully")
+      setRingleadupdate(true);
+      const response = await fetch(`/api/ringLoadScore`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response) {
+        setRingleadupdate(false);
+        console.log("ringLeadScore Updated successfully");
+      }
     } catch (error) {
       console.error(error);
     }
-  }
-  const dynamicColumnss = headerData.map((item: any) => ({
-    key: item.value,
-    title: item.label,
-    dataType: DataType.String // You may need to define DataType according to your needs
-  }));
-
-
-  const dynamicColumns =
-    [
-      { key: "Account", title: "Account", dataType: DataType.String },
-      { key: "FirstName", title: "First Name", dataType: DataType.String },
-      { key: "LastName", title: "Last Name", dataType: DataType.String },
-      { key: "Email", title: "Email", dataType: DataType.String },
-      { key: "RingLeadScore", title: "RingLead Score", dataType: DataType.String },
-    ];
-  useEffect(() => {
-
-    if (typeof window !== 'undefined') {
-      // Your code that depends on the window object
-      const url = new URL(window.location.href);
-    const encodedData = url.searchParams.get("data");
-    if (encodedData) {
-      const decodedData = decodeURIComponent(encodedData);
-      const dataObject = JSON.parse(decodedData);
-      setheaderData(JSON.parse(dataObject.content));
-    }
-  } else {
-    console.log('window is undefined');
-  } }, [])
-  const mapContactsToTableFormat = (contacts: any, header: any) => {
-    if (header.length > 0) {
-      return contacts.map((contact: any) => {
-        const mappedData: any = {};
-        header.forEach((column: any) => {
-          const { value } = column;
-          mappedData[value] = contact[value];
-        });
-        return mappedData;
-      });
-    }
-    else {
-      return false
-    }
   };
 
-
-  useEffect(() => {
-    async function fetchData(data: any) {
-      if (data.length > 0) {
-        setShowTableHeader(dynamicColumnss)
-      } else if (data.length === 0) {
-        setShowTableHeader(dynamicColumns)
-      }
+  const handlePageChange = (newPage: any) => {
+    setPage(newPage);
+    fetchPageData(newPage, filtercontactdata, filterValue,standardfiltervalue);
+    console.log("test 2222", newPage);
+  };
+  const onSearchChange = useCallback((value?: string) => {
+    if (value) {
+      setfiltercontactdata(true);
+      setFilterValue(value);
+      setPage(1);
+    } else {
+      setfiltercontactdata(false);
+      setFilterValue("");
     }
-    fetchData(headerData);
-    const tableDataa = mapContactsToTableFormat(contacts, headerData);
-    setTableData(tableDataa)
+  }, []);
+  
+ 
+  const handlefilter = () => {
+    console.log("handle click filter");
+    setappltyfilter(true);
+    setPage(1);
+    fetchPageData(page, true, filterValue,standardfiltervalue);
+  };
+  const onClear = useCallback(() => {
+    setFilterValue("");
+    setPage(1);
+  }, []);
+  // const topContent = useMemo(() => {
+  //   return (
+  //     <div className="flex flex-col gap-4">
+  //     <div className="flex justify-between gap-3 items-end">
+  //       <FilterControl
+  //         {...{
+  //           fields,
+  //           groups,
+  //           filterValue,
+  //           onFilterValueChanged: onFilterChanged,
+  //         }}
+  //       />
 
+  //         <div className="mt-4 flex md:ml-4 md:mt-0">
+  //           <button
 
-  }, [headerData, contacts])
+  //             onClick={() => handlefilter()}
+  //             type="button"
+  //             disabled={disablebutton}
+  //             className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm"
+  //           >
 
+  //             Apply Filter
+  //           </button>
+  //         </div>
 
+  //       <div className="flex gap-3">
+  //           {/* <Dropdown>
+  //             <DropdownTrigger className="hidden sm:flex">
+  //               <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+  //                 Status
+  //               </Button>
+  //             </DropdownTrigger>
+  //             <DropdownMenu
+  //               disallowEmptySelection
+  //               aria-label="Table Columns"
+  //               closeOnSelect={false}
+  //               selectedKeys={statusFilter}
+  //               selectionMode="multiple"
+  //               onSelectionChange={setStatusFilter}
+  //             >
+  //               {statusOptions.map((status) => (
+  //                 <DropdownItem key={status.uid} className="capitalize">
+  //                   {capitalize(status.name)}
+  //                 </DropdownItem>
+  //               ))}
+  //             </DropdownMenu>
+  //           </Dropdown> */}
+  //           </div>
+  //           </div>
+  //     </div>
+  //   );
+  // }, [filterValue, onSearchChange, onClear]);
   return (
     <>
       <div className="md:flex md:items-center md:justify-between bg-white my-2 px-6 py-3 shadow-sm">
@@ -333,7 +585,16 @@ const ContactList = () => {
           <HeaderDropdown />
         </div>
         <div className="mt-4 flex md:ml-4 md:mt-0">
+          {ringleadupdate && (
+            <div className="pl-2 flex">
+              <Spinner size="sm" />
+              <div className="pt-2 p-2 font-semibold">
+                Updating Ring Lead Score...
+              </div>
+            </div>
+          )}
           <button
+            disabled={ringleadupdate}
             onClick={() => updateRingLeadScore()}
             type="button"
             className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm"
@@ -343,7 +604,7 @@ const ContactList = () => {
         </div>
         <div className="mt-4 flex md:ml-4 md:mt-0">
           <button
-            onClick={() => setShowMyModel(true)}
+            onClick={() => getincludedcontact()}
             type="button"
             className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm"
           >
@@ -351,121 +612,118 @@ const ContactList = () => {
           </button>
         </div>
       </div>
+      <div className="flex flex-col p-1 pr-3 pl-3">
+        <div className="flex justify-between items-end">
+          <FilterControl
+            {...{
+              fields,
+              groups,
+              filterValue,
+              onFilterValueChanged: onFilterChanged,
+            }}
+          />
 
+          <div className="mt-4 flex md:ml-4 md:mt-0">
+            <button
+              onClick={() => handlefilter()}
+              type="button"
+              disabled={disablebutton}
+              className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm"
+            >
+              Apply Filter
+            </button>
 
-      <div className="bg-white my-2 px-6 py-3 shadow-sm">
-        <FilterControl
-          {...{
-            fields,
-            groups,
-            filterValue,
-            onFilterValueChanged: onFilterChanged,
-          }}
-        />
-        <div>
-          <div className="flex justify-between items-center py-3">
-            <div className="flex items-center justify-between">
-              <label className="sr-only">Search</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-700"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+            <div className="flex gap-3">
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button
+                    endContent={<ChevronDownIcon className="text-small" />}
+                    variant="flat"
                   >
-                    <path
-                      fill-rule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  id="table-search"
-                  className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 "
-                  placeholder="Search"
-                  value={searchText}
-                  onChange={(event) => {
-                    setSearchText(event.target.value);
-                  }}
-                />
-              </div>
+                    {selectedValue}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Table Columns"
+                  closeOnSelect={false}
+                  selectedKeys={statusFilter}
+                  selectionMode="single"
+                  onSelectionChange={(status) => handleStanadardFilter(status)}
+                >
+                  {statusOptions.map((status) => (
+                    <DropdownItem key={status.uid} className="capitalize">
+                      {status.name.charAt(0).toUpperCase() +
+                        status.name.slice(1)}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </div>
           </div>
         </div>
-        {loading ? <div className="loader-container">
-          <div className="loader"></div>
-        </div> :
-          <div className="relative shadow-md sm:rounded-lg">
-            <Table
-              columns={showTableHeader}
-              data={tableData ? tableData : contacts &&
-                contacts.map((contact: any) => {
-                  return {
-                    id: contact.id,
-                    Account: contact.Account?.Name,
-                    FirstName: contact.FirstName,
-                    LastName: contact.LastName,
-                    Email:  contact.Email,
-                    RingLeadScore: contact.RingLead_Score__c,
-                  };
-                })}
-              // editingMode={EditingMode.Cell}
-              rowKeyField={"id"}
-              extendedFilter={((data) => filterData(data, filterValue))}
-              search={({ searchText: searchTextValue, rowData, column }) => {
-                if (column.key === "passed") {
-                  return (
-                    (searchTextValue === "false" && !rowData.passed) ||
-                    (searchTextValue === "true" && rowData.passed)
-                  );
-                }
-              }}
-              searchText={searchText}
-              sortingMode={SortingMode.Single}
-            // paging={pagingOptions}
-            />
-            <div className="pagination-controls flex justify-between p-2">
-              <div className="page-size-options">
-                <button
-                  className={`page-size-option ${pageSize === 10 ? "selected" : ""}`}
-                  onClick={() => handlePageSizeChange(10)}
-                >
-                  10
-                </button>
-                <button
-                  className={`page-size-option ${pageSize === 50 ? "selected" : ""}`}
-                  onClick={() => handlePageSizeChange(50)}
-                >
-                  50
-                </button>
-                <button
-                  className={`page-size-option ${pageSize === 100 ? "selected" : ""}`}
-                  onClick={() => handlePageSizeChange(100)}
-                >
-                  100
-                </button>
-              </div>
-              <CustomPagination
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
+      </div>
+      <div className="pb-5">
+        <Table
+          aria-label="Contact table"
+          bottomContent={
+            <div className="flex w-full justify-center">
+              <Pagination
+                siblings={3}
+                loop
+                showControls
+                showShadow
+                color="default"
+                //initialPage={page}
+                page={page}
+                total={pages}
+                onChange={(page) => handlePageChange(page)}
+                // onChange={page => setPage(page)}
               />
             </div>
-          </div>}
+          }
+          bottomContentPlacement="outside"
+          sortDescriptor={sortDescriptor}
+          onSortChange={setSortDescriptor}
+          isStriped
+          classNames={{
+            wrapper: "min-h-[222px]",
+          }}
+        >
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn
+                key={column.key}
+                {...(column.key === "FirstName" ? { allowsSorting: true } : {})}
+              >
+                {column.label}
+              </TableColumn>
+            )}
+          </TableHeader>
+          <TableBody
+            items={users}
+            loadingContent={<Spinner />}
+            loadingState={loadingState}
+          >
+            {(item) => (
+              <TableRow>
+                {(columnKey) => (
+                  <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                )}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
       <div>
-        <GetContact onClose={handleOnClose} visible={showMyModal} filterVal={filterValue} />
+        <GetContact
+          onClose={handleOnClose}
+          visible={showMyModal}
+          filterVal={filterValueforexcel}
+        />
       </div>
     </>
   );
 };
 
-
 export default ContactList;
-
-
-

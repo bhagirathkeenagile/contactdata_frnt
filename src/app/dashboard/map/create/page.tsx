@@ -5,6 +5,7 @@ import { BASE_URL } from "../../../../../utils";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { Spinner} from "@nextui-org/react";
 
 const importAction = [
   { label: "Insert And Update", value: "insert_update" },
@@ -486,7 +487,7 @@ const CreateNewMap = () => {
 
 
   /////////////////////////////////////////////////////////////////////////////////////////////
-
+  const [showspinner,setshowspinner] =useState(false);
   const router = useRouter();
   
   const importData = async () => {
@@ -501,6 +502,7 @@ const CreateNewMap = () => {
       email: email,
     };
     try {
+      setshowspinner(true);
       // if action is Import or edit then update api hit
       if (actionParam === "Import" || actionParam === "Edit") {
         const response = await fetch(`${BASE_URL}/map/updatemapFiledById/${mapUpdateid}`, {
@@ -530,6 +532,7 @@ const CreateNewMap = () => {
         if (response.ok) {
           console.log("Post created successfully");
           router.push("/dashboard/map")
+          setshowspinner(false);
 
         } else {
           console.error("Error creating post");
@@ -1182,8 +1185,18 @@ const CreateNewMap = () => {
               </table>}
 
             <div className="mt-5 sm:mt-4 sm:flex justify-end col-span-2">
+
+            {showspinner && (
+                    <div className="pl-2 pr-20 flex">
+                    
+                    <Spinner size="sm" /> 
+                    <div className="pt-2 p-2 font-semibold"> Uploading Contacts... </div>
+                    </div>
+                  )}
+
               <button
                 type="button"
+                disabled={showspinner}
                 className="inline-flex items-center gap-x-2 rounded-md bg-blue-001 mr-4 px-4 py-2 text-xs text-white shadow-sm"
                 onClick={() => {
                   importData();
