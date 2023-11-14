@@ -140,11 +140,10 @@ export default function MapList() {
 
     saveAs(blob, "data.xlsx");
   };
-    type User = typeof mapList[0];
-    const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
-      const cellValue = user[columnKey as keyof User];
+    const renderCell = React.useCallback((user: any, columnKey: React.Key) => {
+      const cellValue = user[columnKey as keyof any];
       console.log('cellValue ----',cellValue)
-  console.log('user ----',user)
+      console.log('user ----',user)
       switch (columnKey) {
         case "actions":
           return (
