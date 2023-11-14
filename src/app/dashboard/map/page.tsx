@@ -3,11 +3,13 @@ import React from "react";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 // import MapTable from "./table";
 import { useState, useEffect, useMemo } from "react";
-import VerticalDotsIcon from "../contacts/icons";
-import {EditIcon} from "../contacts/icons";
-import {DeleteIcon} from "../contacts/icons";
-import {EyeIcon} from "../contacts/icons";
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, ChipProps, getKeyValue} from "@nextui-org/react";
+import {VerticalDotsIcon} from "../contacts/icons";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, ChipProps, 
+  DropdownTrigger,
+  Button,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,getKeyValue} from "@nextui-org/react";
 
 import { utils, write } from "xlsx";
 const dataArray = Array(10)
@@ -24,8 +26,8 @@ import ActionMenu from "./filters/actionMenu";
 import axios from "axios";
 import { BASE_URL } from "../../../../utils";
 const columns = [
-  { name: "ID", uid: "id", sortable: true },
-  { name: "NAME", uid: "column1", sortable: true },
+  {name: "", uid: "actions"},
+  { name: "Name", uid: "column1", sortable: true },
   { name: "Main Table", uid: "column2", sortable: true },
   { name: "Created At", uid: "column3", sortable: true },
   { name: "Updated At", uid: "column4" },
@@ -146,42 +148,37 @@ export default function MapList() {
         case "name":
           return (
             <div className="flex flex-col">
-            <p className="text-bold text-sm capitalize">{cellValue}</p>
-           
+            <p className="text-bold text-small capitalize">{cellValue}</p>
           </div>
           );
         case "role":
           return (
             <div className="flex flex-col">
-            <p className="text-bold text-sm capitalize">{cellValue}</p>
-           
-          </div>
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+            </div>
           );
         case "status":
           return (
             <div className="flex flex-col">
-            <p className="text-bold text-sm capitalize">{cellValue}</p>
-           
-          </div>
+              <p className="text-bold text-small capitalize">{cellValue}</p>
+            </div>
           );
         case "actions":
           return (
-            <div className="relative flex items-center gap-2">
-              <Tooltip content="Details">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                  <EyeIcon />
-                </span>
-              </Tooltip>
-              <Tooltip content="Edit user">
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                  <EditIcon />
-                </span>
-              </Tooltip>
-              <Tooltip color="danger" content="Delete user">
-                <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                  <DeleteIcon />
-                </span>
-              </Tooltip>
+            <div className="relative flex justify-end items-center gap-2">
+              <ActionMenu/>
+              {/* <Dropdown>
+                <DropdownTrigger>
+                  <Button isIconOnly size="sm" variant="light">
+                    <VerticalDotsIcon/>
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                  <DropdownItem>Edit</DropdownItem>
+                  <DropdownItem>Clone</DropdownItem>
+                  <DropdownItem>Remove</DropdownItem>
+                </DropdownMenu>
+              </Dropdown> */}
             </div>
           );
         default:
@@ -292,7 +289,7 @@ export default function MapList() {
             </div>
           </div>
           <>
-            <Table aria-label="Example table with custom cells">
+            <Table aria-label="Example table with custom cells" isStriped>
               <TableHeader columns={columns}>
                 {(column) => (
                   <TableColumn

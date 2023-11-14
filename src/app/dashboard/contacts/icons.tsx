@@ -163,18 +163,12 @@ export const ChevronDownIcon = ({strokeWidth = 1.5, ...otherProps}) => (
     />
   </svg>
 );
-import { FC } from 'react';
-interface VerticalDotsIconProps {
+import {SVGProps} from "react";
+
+export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
-  width?: number;
-  height?: number;
-}
-const VerticalDotsIcon: FC<VerticalDotsIconProps> = ({
-  size = 24,
-  width,
-  height,
-  ...props
-}) => (
+};
+export const VerticalDotsIcon = ({size = 24, width, height, ...props}: IconSvgProps) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -186,13 +180,11 @@ const VerticalDotsIcon: FC<VerticalDotsIconProps> = ({
     {...props}
   >
     <path
-      d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+      d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
       fill="currentColor"
     />
   </svg>
 );
-
-export default VerticalDotsIcon;
 export const editIcon = (props:any) => (
   <svg
     aria-hidden="true"
