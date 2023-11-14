@@ -143,30 +143,15 @@ export default function MapList() {
     type User = typeof mapList[0];
     const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
       const cellValue = user[columnKey as keyof User];
-  
+      console.log('cellValue ----',cellValue)
+  console.log('user ----',user)
       switch (columnKey) {
-        case "name":
-          return (
-            <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-          </div>
-          );
-        case "role":
-          return (
-            <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
-            </div>
-          );
-        case "status":
-          return (
-            <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
-            </div>
-          );
         case "actions":
           return (
             <div className="relative flex justify-end items-center gap-2">
-              <ActionMenu/>
+              <ActionMenu onItemSelected={handleItemSelected}
+                            selectedId={user.id}
+                            />
               {/* <Dropdown>
                 <DropdownTrigger>
                   <Button isIconOnly size="sm" variant="light">
