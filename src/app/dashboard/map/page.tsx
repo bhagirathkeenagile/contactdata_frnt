@@ -1,14 +1,14 @@
 "use client";
+import React from "react";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 // import MapTable from "./table";
-import { useState, useEffect } from "react";
-import { Table } from "ka-table";
-import {
-  DataType,
-  EditingMode,
-  SortingMode,
-  PagingPosition,
-} from "ka-table/enums";
+import { useState, useEffect, useMemo } from "react";
+import VerticalDotsIcon from "../contacts/icons";
+import {EditIcon} from "../contacts/icons";
+import {DeleteIcon} from "../contacts/icons";
+import {EyeIcon} from "../contacts/icons";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, ChipProps, getKeyValue} from "@nextui-org/react";
+
 import { utils, write } from "xlsx";
 const dataArray = Array(10)
   .fill(undefined)
@@ -23,10 +23,31 @@ import { saveAs } from "file-saver";
 import ActionMenu from "./filters/actionMenu";
 import axios from "axios";
 import { BASE_URL } from "../../../../utils";
-
-const MapList = () => {
+const columns = [
+  { name: "ID", uid: "id", sortable: true },
+  { name: "NAME", uid: "column1", sortable: true },
+  { name: "Main Table", uid: "column2", sortable: true },
+  { name: "Created At", uid: "column3", sortable: true },
+  { name: "Updated At", uid: "column4" },
+];
+const statusColorMap = {
+  active: "success",
+  paused: "danger",
+  vacation: "warning",
+};
+const INITIAL_VISIBLE_COLUMNS = ["column1", "column2", "column3", "column4"];
+export default function MapList() {
+  const [visibleColumns, setVisibleColumns] = React.useState(
+    new Set(INITIAL_VISIBLE_COLUMNS)
+  );
   const [mapList, setMapList] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [pagescount, setPages] = React.useState(10);
+  const [page, setPage] = React.useState(1);
+  const rowsPerPage: number = 10;
+  const pages: number = useMemo(() => {
+    return Math.ceil(pagescount / rowsPerPage);
+  }, [pagescount, rowsPerPage]);
   // create data and update function
   const dateConverter = (date: any) => {
     const inputDate = date;
@@ -60,7 +81,26 @@ const MapList = () => {
     try {
       const response = await axios.get(`${BASE_URL}/map/list-mapData`); // Use axios.get instead of fetch
       const data = response.data;
-      setMapList(data.mapListData);
+      setPages(response!.data.length);
+      setMapList(
+        data.mapListData.map((item: any) => {
+          return {
+            column1: item.name,
+            column2: item.mainTable,
+            column3: `${new Date(
+              item.created_at
+            ).toLocaleDateString()} ${new Date(
+              item.created_at
+            ).toTimeString()}`,
+            column4: `${new Date(
+              item.updated_at
+            ).toLocaleDateString()} ${new Date(
+              item.updated_at
+            ).toLocaleTimeString()}`,
+            id: item.id,
+          };
+        })
+      );
     } catch (error) {
       console.error(error);
     }
@@ -80,11 +120,10 @@ const MapList = () => {
         dateConverter(person.updated_at),
       ]),
     ];
-
+    
     const ws = utils.aoa_to_sheet(data);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Sheet1");
-
     const blob = new Blob(
       [
         write(wb, {
@@ -99,9 +138,68 @@ const MapList = () => {
 
     saveAs(blob, "data.xlsx");
   };
+    type User = typeof mapList[0];
+    const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
+      const cellValue = user[columnKey as keyof User];
+  
+      switch (columnKey) {
+        case "name":
+          return (
+            <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize">{cellValue}</p>
+           
+          </div>
+          );
+        case "role":
+          return (
+            <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize">{cellValue}</p>
+           
+          </div>
+          );
+        case "status":
+          return (
+            <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize">{cellValue}</p>
+           
+          </div>
+          );
+        case "actions":
+          return (
+            <div className="relative flex items-center gap-2">
+              <Tooltip content="Details">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  <EyeIcon />
+                </span>
+              </Tooltip>
+              <Tooltip content="Edit user">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  <EditIcon />
+                </span>
+              </Tooltip>
+              <Tooltip color="danger" content="Delete user">
+                <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                  <DeleteIcon />
+                </span>
+              </Tooltip>
+            </div>
+          );
+        default:
+          return cellValue;
+      }
+    }, []);
+
   //Action menu function for selection
   const handleItemSelected = (item: any, itemId: any) => {
     fetchData();
+  };
+  const headerColumns = React.useMemo(() => {
+    return columns.filter((column) =>
+      Array.from(visibleColumns).includes(column.uid)
+    );
+  }, [visibleColumns]);
+  const handlePageChange = (newPage: any) => {
+    setPage(newPage);
   };
 
   return (
@@ -194,7 +292,28 @@ const MapList = () => {
             </div>
           </div>
           <>
-            <Table
+            <Table aria-label="Example table with custom cells">
+              <TableHeader columns={columns}>
+                {(column) => (
+                  <TableColumn
+                    key={column.uid}
+                    align={column.uid === "actions" ? "center" : "start"}
+                  >
+                    {column.name}
+                  </TableColumn>
+                )}
+              </TableHeader>
+              <TableBody items={mapList}>
+                {(item) => (
+                  <TableRow key={item}> 
+                    {(columnKey) => (
+                      <TableCell>{renderCell(item, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            {/* <Table
               columns={[
                 {
                   key: "command1",
@@ -271,7 +390,7 @@ const MapList = () => {
                   },
                 },
               }}
-            />
+            /> */}
           </>
         </div>
       </div>
@@ -279,4 +398,4 @@ const MapList = () => {
   );
 };
 
-export default MapList;
+

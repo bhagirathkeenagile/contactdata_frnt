@@ -430,7 +430,7 @@ const ContactList = () => {
     const AvailContacts =
         '{"AND":[' +
         newConvertedData +
-        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Avail) Suppress Cold Only","(Avail) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        ',{"AND":[{"export_status":null},{"Account":{"id":{"not":null}}},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Avail) Suppress Cold Only","(Avail) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
         thirtyDaysAgo.toISOString() +
         '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
         twoseventydaysAgo.toISOString() +
@@ -444,7 +444,7 @@ const ContactList = () => {
       const teladvanceContacts =
         '{"AND":[' +
         newConvertedData +
-        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        ',{"AND":[{"export_status":null},{"Account":{"id":{"not":{"equals":null}}}},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"OR":[{"Account":{"shippingcountry":{"in":["USA","US","United States","United States of America"]}}},{"Account":{"shippingcountry":""}}]},{"Account":{"Marketing_Suppression__c":{"not":{"in":["(All Brands) Suppress Cold Only","(All Brands) Suppress Cold and Warm","(Teladvance) Suppress Cold Only","(Teladvance) Suppress Cold and Warm"]}}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Email":{"not":{"equals":""}}},{"Last_Quickmail_Import__c":{"lt":"' +
         thirtyDaysAgo.toISOString() +
         '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Account":{"Lot_Last_Created__c":{"lt":"' +
         twoseventydaysAgo.toISOString() +
@@ -456,16 +456,16 @@ const ContactList = () => {
 
         const allContact = '{"AND":[' +
         newConvertedData +
-        ',{"AND":[{"export_status":null}]}]}';
+        ',{"AND":[{"export_status":null},{"Account":{"Name":{"not":null}}}]}]}';
         const test='{"AND":[' +
         newConvertedData +
-        ',{"AND":[{"export_status":null},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
+        ',{"AND":[{"export_status":null},{"AccountId":{"not":null}},{"RecordTypeId":{"not":"0122E0000008mQcQAI"}},{"IsWarm__c":false},{"NOT":{"AND":[{"Email":{"contains":"gov"}},{"Email":{"contains":"edu"}},{"Email":{"contains":"mil"}}]}},{"Account":{"shippingcountry":{"in":["USA","United States","United States of America",""]}}},{"Account":{"Type":{"not":{"in":["Competitor","Downstream","Solar","Vendor"]}}}},{"Last_Quickmail_Import__c":{"lt":"' +
         thirtyDaysAgo.toISOString() +
         '"}},{"Outreach_Stage__c":{"not":{"in":["Do Not Contact","Not Interested","Bad Contact Info","Bad Fit","Not Active","Portal User","Replied","Interested","Tasked"]}}},{"Low_Grade_Title__c":false},{"Most_Recent_Marketing_Action__c":{"lt":"' +
         sixtydaysAgo.toISOString() +
         '"}}]}]}';
         if(standardfiltervalue=='Avail Contacts'){
-          changeFilterforexcel(test)
+          changeFilterforexcel(AvailContacts)
           setShowMyModel(true)
         }
         else if(standardfiltervalue=='TelAdvance Contacts'){
