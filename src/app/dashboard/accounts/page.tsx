@@ -33,8 +33,8 @@ const headerColumns = [
   { name: "Name", uid: "Name" },
   { name: "Number Of Employees", uid: "NumberOfEmployees" },
   { name: "Type", uid: "Type" },  
-  { name: "Marketing_Suppression", uid: "Marketing_Suppression" },
-  { name: "Revenue", uid: "Revenue" },
+  { name: "Marketing Suppression", uid: "Marketing_Suppression" },
+  { name: "Revenue($)", uid: "Revenue" },
 ];
 const fields = [
   {
