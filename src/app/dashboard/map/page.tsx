@@ -4,7 +4,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 // import MapTable from "./table";
 import { useState, useEffect, useMemo } from "react";
 import {VerticalDotsIcon} from "../contacts/icons";
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, ChipProps, 
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, ChipProps, 
   DropdownTrigger,
   Button,
   Dropdown,
@@ -64,6 +64,27 @@ export default function MapList() {
     });
     return formattedDate;
   };
+  const[mapfilter,setmapfilter] =useState('');
+  const[hasfilter,sethasfilter] =useState(false);
+  useEffect(() => {  
+     
+    console.log(searchText);
+    if(searchText.length>4){
+      sethasfilter(true);
+      const filter=('{"name":{"contains":"'+searchText+'"}}');
+      console.log(searchText);
+      setmapfilter(filter);
+    fetchData();
+    }
+    if(searchText.length===0){
+      console.log('searchText.length',searchText.length)
+      sethasfilter(false);
+      fetchData();
+    }
+  },[searchText]);
+  useEffect(() => {  
+    fetchData();
+   },[page])
   // useEffect(() => {
   //   const fetchData = async () => {
   //     try {
@@ -81,9 +102,18 @@ export default function MapList() {
   // }, []);
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/map/list-mapData`); // Use axios.get instead of fetch
+      let response:any;
+      if(hasfilter){
+       response = await axios.post(`${BASE_URL}/map/list-mapData?page=${page}&pageSize=${rowsPerPage}`,
+      {filterval: mapfilter,filterseconf: "1",});
+     }else{
+      response = await axios.post(`${BASE_URL}/map/list-mapData?page=${page}&pageSize=${rowsPerPage}`,
+      {filterval: '',filterseconf: "1",});
+     } // Use axios.get instead of fetch
       const data = response.data;
-      setPages(response!.data.length);
+      const totalPages = Math.ceil(response!.data.totalContacts/rowsPerPage);
+      const roundedTotalPages = Math.max(Math.ceil(totalPages), 1);
+      setPages(roundedTotalPages);
       setMapList(
         data.mapListData.map((item: any) => {
           return {
@@ -273,7 +303,25 @@ export default function MapList() {
             </div>
           </div>
           <>
-            <Table aria-label="Example table with custom cells" isStriped>
+            <Table
+              aria-label="Example table with custom cells"
+              isStriped
+              bottomContent={
+                <div className="flex w-full justify-center">
+                  <Pagination
+                    siblings={3}
+                    loop
+                    isCompact
+                    showControls
+                    showShadow
+                    color="default"
+                    page={page}
+                    total={pages}
+                    onChange={(page) => handlePageChange(page)}
+                  />
+                </div>
+              }
+            >
               <TableHeader columns={columns}>
                 {(column) => (
                   <TableColumn
@@ -286,7 +334,7 @@ export default function MapList() {
               </TableHeader>
               <TableBody items={mapList}>
                 {(item) => (
-                  <TableRow key={item}> 
+                  <TableRow key={item}>
                     {(columnKey) => (
                       <TableCell>{renderCell(item, columnKey)}</TableCell>
                     )}

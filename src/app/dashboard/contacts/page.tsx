@@ -393,7 +393,10 @@ const ContactList = () => {
       }
       if (response!.status === 201 || response!.status === 200) {
         setIsLoading(false)
-        setPages(response!.data.totalContacts);
+        const totalPages = Math.ceil(response!.data.totalContacts/rowsPerPage);
+        const roundedTotalPages = Math.max(Math.ceil(totalPages), 1);
+        setPages(roundedTotalPages);
+       // setPages(response!.data.totalContacts);
         console.log("response12", response!.data.contacts);
         const result = await response!.data.contacts;
         setData(result);

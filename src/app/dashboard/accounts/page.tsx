@@ -1,13 +1,38 @@
 "use client";
-import { DataType, Table } from "ka-table";
-import { PagingPosition, SortingMode } from "ka-table/enums";
+import React from "react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Input,
+  Spinner,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Chip,
+  getKeyValue,
+  Pagination,
+  Selection,
+  ChipProps,
+  SortDescriptor,
+} from "@nextui-org/react";
+import { SearchIcon } from "../contacts/icons";
 import { useEffect, useState } from "react";
 import FilterControl from "react-filter-control";
 import { IFilterControlFilterValue } from "react-filter-control/interfaces";
 import { filterData } from "./filterData";
 import HeaderDropdown from "./filters/headerDropdown";
 import GetContact from "./model/getContacts";
-
+import axios from "axios";
+import { BASE_URL } from "../../../../utils";
+const headerColumns = [
+  { name: "Name", uid: "Name" },
+  { name: "BillingAddress", uid: "BillingAddress" },
+];
 const fields = [
   {
     caption: "Name",
@@ -62,6 +87,10 @@ const filter: IFilterControlFilterValue = {
   items: [],
 };
 const AccountList = () => {
+  const [page, setPage] = React.useState(1);
+  const [pages, setPages] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [filterValue1, setFilterValue] = React.useState("");
   const [searchText, setSearchText] = useState("");
   const [showMyModal, setShowMyModel] = useState(false);
   const handleOnClose = () => setShowMyModel(false);
@@ -70,15 +99,126 @@ const AccountList = () => {
     changeFilter(newFilterValue);
   };
   const [accounts, setAccounts] = useState<any>([]);
-
+  const [accountintable, setaccountintable] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasfilter,sethasfilter] = useState<boolean>(false)
+  const loadingState = isLoading ? "loading" : "idle";
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch("/api/account");
-      const data = await response.json();
-      setAccounts(data.body.accounts);
-    }
+    if(!hasfilter){
     fetchData();
+    }
+  }, [page]);
+  const fetchData = async () => {
+    console.log("response", isLoading, "loadingState", loadingState);
+    const response = await axios.post(
+      `${BASE_URL}/map/get-account?page=${page}&pageSize=${rowsPerPage}`
+    );
+    if (response.status === 201) {
+      const totalPages = Math.ceil(response.data.totalContacts/rowsPerPage);
+      const roundedTotalPages = Math.max(Math.ceil(totalPages), 1);
+      setPages(roundedTotalPages);
+      console.log("response 1", response);
+      setAccounts(response.data.accounts);
+      setaccountintable(
+        response.data.accounts.map((account: any) => {
+          return {
+            Name: account.Name,
+            BillingAddress: `${account.BillingCity}, ${account.BillingState}`,
+            id: account.id,
+          };
+        })
+      );
+      setIsLoading(false);
+    }
+  };
+  const [newConvertedData,setnewConvertedData] = useState("");
+  useEffect(() => {
+    if(searchText.length>4){
+
+    console.log("searchText", searchText);
+    const filter=('{"Name":{"contains":"'+searchText+'"}}');
+    sethasfilter(true);
+    setIsLoading(true);
+    fetchfilterData(filter)
+    }
+    if(searchText.length===0){
+      fetchData();
+    }
+  }, [searchText,page]);
+  const fetchfilterData = async (filter:any) => {
+    console.log("response", isLoading, "loadingState", loadingState);
+    const response = await axios.post(
+      `${BASE_URL}/map/get-account-filter?page=${page}&pageSize=${rowsPerPage}`,
+      {filterval: filter,filterseconf: "1",}
+    );
+    if (response.status === 201) {
+      setIsLoading(false)
+      const totalPages = Math.ceil(response.data.totalContacts/rowsPerPage);
+      const roundedTotalPages = Math.max(Math.ceil(totalPages), 1);
+      setPages(roundedTotalPages);
+      console.log("response 1", response);
+      setAccounts(response.data.accounts);
+      setaccountintable(
+        response.data.accounts.map((account: any) => {
+          return {
+            Name: account.Name,
+            BillingAddress: `${account.BillingCity}, ${account.BillingState}`,
+            id: account.id,
+          };
+        })
+      );
+      setIsLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage: any) => {
+    setPage(newPage);
+    //  fetchData();
+    console.log("test 2222", newPage);
+  };
+  const onRowsPerPageChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setRowsPerPage(Number(e.target.value));
+      setPage(1);
+    },
+    []
+  );
+  const onSearchChange = React.useCallback((value?: string) => {
+    if (value) {
+      setFilterValue(value);
+      setPage(1);
+    } else {
+      setFilterValue("");
+    }
   }, []);
+  const finalpaginatedaccount = React.useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    console.log("start end ", start, end, accountintable);
+    return accountintable.slice(start, end);
+  }, [page, accountintable, rowsPerPage]);
+  const onClear = React.useCallback(() => {
+    setFilterValue("");
+    setPage(1);
+  }, []);
+  const topContent = React.useMemo(() => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between gap-3 items-end">
+          <Input
+            isClearable
+            className="w-full sm:max-w-[44%]"
+            placeholder="Search by name..."
+            startContent={<SearchIcon />}
+            value={filterValue1}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
+          />
+        </div>
+      </div>
+    );
+  }, []);
+
   return (
     <>
       <div className="md:flex md:items-center md:justify-between bg-white my-2 px-6 py-3 shadow-sm">
@@ -91,14 +231,14 @@ const AccountList = () => {
       </div>
 
       <div className="bg-white my-2 px-6 py-3 shadow-sm">
-        <FilterControl
+        {/* <FilterControl
           {...{
             fields,
             groups,
             filterValue,
             onFilterValueChanged: onFilterChanged,
           }}
-        />
+        /> */}
         <div>
           <div className="flex justify-between items-center py-3">
             <div className="flex items-center justify-between">
@@ -135,6 +275,71 @@ const AccountList = () => {
         </div>
         <div className="relative shadow-md sm:rounded-lg">
           <Table
+            aria-label="Example table with custom cells, pagination and sorting"
+            isHeaderSticky
+            isStriped
+            bottomContent={
+              <>
+                {/* <div className="flex justify-between items-center">
+                  <label className="flex items-center text-default-400 text-small">
+                    Rows per page:
+                    <select
+                      className="bg-transparent outline-none text-default-400 text-small"
+                      onChange={onRowsPerPageChange}
+                      defaultValue="10"
+                    >
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                    </select>
+                  </label>
+                </div> */}
+                <div className="flex w-full justify-center">
+                  <Pagination
+                    siblings={3}
+                    loop
+                    isCompact
+                    showControls
+                    showShadow
+                    color="default"
+                    page={page}
+                    total={pages}
+                    onChange={(page) => handlePageChange(page)}
+                  />
+                </div>
+              </>
+            }
+            bottomContentPlacement="outside"
+            classNames={{
+              wrapper: "max-h-[382px]",
+            }}
+            topContentPlacement="outside"
+          >
+            <TableHeader columns={headerColumns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  align={column.uid === "actions" ? "center" : "start"}
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody
+              items={accountintable ?? []}
+              loadingContent={<Spinner />}
+              loadingState={loadingState}
+            >
+              {(item) => (
+                <TableRow>
+                  {(columnKey) => (
+                    <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          {/* <Table
             columns={[
               { key: "Name", title: "Name", dataType: DataType.String },
               {
@@ -173,12 +378,12 @@ const AccountList = () => {
               pageSizes: [5, 10, 15],
               position: PagingPosition.Bottom,
             }}
-          />
+          /> */} 
         </div>
       </div>
-      <div>
+      {/* <div>
         <GetContact onClose={handleOnClose} visible={showMyModal} />
-      </div>
+      </div> */}
     </>
   );
 };

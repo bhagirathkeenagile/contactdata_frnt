@@ -146,7 +146,7 @@ const Sidebar = () => {
                           {nav.map((nav) => (
                             <li key={nav.name}>
 
-                              <a
+                              <Link
                                 href={nav.href}
                                 className={classNames(
                                   nav.current ? 'bg-gray-50' : 'hover:bg-gray-700',
@@ -155,7 +155,7 @@ const Sidebar = () => {
                               >
                                 <nav.icon className="h-6 w-6 shrink-0 text-gray-400" aria-hidden="true" />
                                 {nav.name}
-                              </a>
+                              </Link>
                             </li>
                           ))}
                         </ul>
@@ -235,7 +235,7 @@ const Sidebar = () => {
                 <ul role="list" className="-mx-2 mt-2 space-y-1 pb-4">
                   {nav.map((nav) => (
                     <li key={nav.name}>
-                      <a
+                      <Link
                         href={nav.href}
                         className={classNames(
                           nav.current ? 'bg-gray-50' : 'hover:text-gray-200',
@@ -249,7 +249,7 @@ const Sidebar = () => {
                           )}
                           aria-hidden="true" />
                         {nav.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>

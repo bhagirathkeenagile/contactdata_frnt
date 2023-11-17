@@ -22,7 +22,7 @@ const ActionMenu = ({ onItemSelected, selectedId }: any) => {
   const [mapList, setMapList] = useState([]);
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/map/list-mapData`); // Use axios.get instead of fetch
+      const response = await axios.post(`${BASE_URL}/map/list-mapData`); // Use axios.get instead of fetch
       const data = response.data;
       onItemSelected(data.mapListData);
       setMapList(data.mapListData);
