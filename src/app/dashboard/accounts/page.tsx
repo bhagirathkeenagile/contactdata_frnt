@@ -31,7 +31,10 @@ import axios from "axios";
 import { BASE_URL } from "../../../../utils";
 const headerColumns = [
   { name: "Name", uid: "Name" },
-  { name: "BillingAddress", uid: "BillingAddress" },
+  { name: "Number Of Employees", uid: "NumberOfEmployees" },
+  { name: "Type", uid: "Type" },  
+  { name: "Marketing_Suppression", uid: "Marketing_Suppression" },
+  { name: "Revenue", uid: "Revenue" },
 ];
 const fields = [
   {
@@ -123,7 +126,9 @@ const AccountList = () => {
         response.data.accounts.map((account: any) => {
           return {
             Name: account.Name,
-            BillingAddress: `${account.BillingCity}, ${account.BillingState}`,
+            NumberOfEmployees: account.NumberOfEmployees,
+            Marketing_Suppression:account.Marketing_Suppression__c,
+            Revenue:account.Revenue__c,
             id: account.id,
           };
         })
@@ -162,7 +167,9 @@ const AccountList = () => {
         response.data.accounts.map((account: any) => {
           return {
             Name: account.Name,
-            BillingAddress: `${account.BillingCity}, ${account.BillingState}`,
+            NumberOfEmployees: account.NumberOfEmployees,
+            Marketing_Suppression:account.Marketing_Suppression__c,
+            Revenue:account.Revenue__c,
             id: account.id,
           };
         })
